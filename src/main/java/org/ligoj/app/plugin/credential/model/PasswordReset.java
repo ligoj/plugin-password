@@ -21,7 +21,7 @@ import org.ligoj.bootstrap.core.validation.LowerCase;
 @Getter
 @Setter
 @Entity
-@Table(name = "SAAS_PASSWORD_RESET")
+@Table(name = "LIGOJ_PASSWORD_RESET")
 public class PasswordReset extends AbstractPersistable<Integer> {
 
 	/**
