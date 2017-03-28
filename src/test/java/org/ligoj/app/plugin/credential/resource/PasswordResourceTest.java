@@ -60,7 +60,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 
 	@Before
 	public void prepareConfiguration() throws IOException {
-		persistEntities("csv/app-test", SystemConfiguration.class);
+		persistEntities("csv", SystemConfiguration.class);
 		exOnPrepare = null;
 	}
 
