@@ -21,11 +21,12 @@ import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
-import org.ligoj.app.api.IPasswordGenerator;
-import org.ligoj.app.api.SimpleUserOrg;
-import org.ligoj.app.api.UserOrg;
+import org.ligoj.app.api.FeaturePlugin;
+import org.ligoj.app.iam.IPasswordGenerator;
 import org.ligoj.app.iam.IUserRepository;
 import org.ligoj.app.iam.IamProvider;
+import org.ligoj.app.iam.SimpleUserOrg;
+import org.ligoj.app.iam.UserOrg;
 import org.ligoj.app.plugin.credential.dao.PasswordResetRepository;
 import org.ligoj.app.plugin.credential.model.PasswordReset;
 import org.ligoj.app.plugin.mail.resource.MailServicePlugin;
@@ -50,7 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-public class PasswordResource implements IPasswordGenerator {
+public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	private static final String MAIL_NODE = "password.mail.node";
 	private static final String URL_PUBLIC = "password.mail.url";
@@ -120,7 +121,8 @@ public class PasswordResource implements IPasswordGenerator {
 	@Path("reset/{uid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void reset(final ResetPasswordByMailChallenge request, @PathParam("uid") final String uid) {
-		// check token in database : Invalid token, or out-dated, or invalid user ?
+		// check token in database : Invalid token, or out-dated, or invalid
+		// user ?
 		final PasswordReset passwordReset = repository.findByLoginAndTokenAndDateAfter(uid, request.getToken(),
 				DateTime.now().minusHours(NumberUtils.INTEGER_ONE).toDate());
 		if (passwordReset == null) {
@@ -151,8 +153,10 @@ public class PasswordResource implements IPasswordGenerator {
 			// Case insensitive match
 			final Set<String> mails = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 			mails.addAll(userLdap.getMails());
-			if (!mails.add(mail) && repository.findByLoginAndDateAfter(uid, DateTime.now().minusMinutes(5).toDate()) == null) {
-				// We accept password reset only if no request has been done for 5 minutes
+			if (!mails.add(mail)
+					&& repository.findByLoginAndDateAfter(uid, DateTime.now().minusMinutes(5).toDate()) == null) {
+				// We accept password reset only if no request has been done for
+				// 5 minutes
 				createPasswordReset(uid, mail, userLdap, UUID.randomUUID().toString());
 			}
 		}
@@ -187,21 +191,24 @@ public class PasswordResource implements IPasswordGenerator {
 			String link = configurationResource.get(URL_PUBLIC) + "#reset=" + token + "/" + user.getId();
 			link = "<a href=\"" + link + "\">" + link + "</a>";
 			mimeMessage.setHeader("Content-Type", "text/plain; charset=UTF-8");
-			mimeMessage.setFrom(
-					new InternetAddress(configurationResource.get(MESSAGE_FROM), configurationResource.get(MESSAGE_FROM_TITLE), CharEncoding.UTF_8));
+			mimeMessage.setFrom(new InternetAddress(configurationResource.get(MESSAGE_FROM),
+					configurationResource.get(MESSAGE_FROM_TITLE), CharEncoding.UTF_8));
 			mimeMessage.setRecipient(Message.RecipientType.TO, internetAddress);
 			mimeMessage.setSubject(configurationResource.get(SUBJECT), CharEncoding.UTF_8);
-			mimeMessage.setContent(String.format(configurationResource.get(MESSAGE_RESET), fullName, link, fullName, link),
+			mimeMessage.setContent(
+					String.format(configurationResource.get(MESSAGE_RESET), fullName, link, fullName, link),
 					"text/html; charset=UTF-8");
 		});
 	}
 
 	/**
-	 * Send an email using the default mail node. If no mail is configured, nothing happens.
+	 * Send an email using the default mail node. If no mail is configured,
+	 * nothing happens.
 	 */
 	private void sendMail(final MimeMessagePreparator preparator) {
 		final String node = configurationResource.get(MAIL_NODE);
-		Optional.ofNullable(servicePluginLocator.getResource(node, MailServicePlugin.class)).map(p->p.send(node, preparator));
+		Optional.ofNullable(servicePluginLocator.getResource(node, MailServicePlugin.class))
+				.map(p -> p.send(node, preparator));
 	}
 
 	/**
@@ -209,7 +216,8 @@ public class PasswordResource implements IPasswordGenerator {
 	 */
 	@Scheduled(cron = "0 0 1 1/1 * ?")
 	public void cleanRecoveries() {
-		// @Modifying + @Scheduled + @Transactional [+protected] --> No TX, wait for next release & TU
+		// @Modifying + @Scheduled + @Transactional [+protected] --> No TX, wait
+		// for next release & TU
 		SpringUtils.getBean(PasswordResource.class).cleanRecoveriesInternal();
 	}
 
@@ -221,8 +229,8 @@ public class PasswordResource implements IPasswordGenerator {
 	}
 
 	/**
-	 * Generate a password for given user. This password is is stored as digested in
-	 * corresponding LDAP entry.
+	 * Generate a password for given user. This password is is stored as
+	 * digested in corresponding LDAP entry.
 	 * 
 	 * @param uid
 	 *            LDAP UID of user.
@@ -234,8 +242,8 @@ public class PasswordResource implements IPasswordGenerator {
 	}
 
 	/**
-	 * Set the password of given user (UID) and return the generated one. This password is stored as digested in
-	 * corresponding LDAP entry.
+	 * Set the password of given user (UID) and return the generated one. This
+	 * password is stored as digested in corresponding LDAP entry.
 	 * 
 	 * @param uid
 	 *            LDAP UID of user.
@@ -248,8 +256,8 @@ public class PasswordResource implements IPasswordGenerator {
 	}
 
 	/**
-	 * Set the password of given user (UID) and return the generated one. This password is stored as digested in
-	 * corresponding LDAP entry.
+	 * Set the password of given user (UID) and return the generated one. This
+	 * password is stored as digested in corresponding LDAP entry.
 	 * 
 	 * @param uid
 	 *            LDAP UID of user.
@@ -293,17 +301,19 @@ public class PasswordResource implements IPasswordGenerator {
 		sendMail(mimeMessage -> {
 			final InternetAddress[] internetAddresses = new InternetAddress[user.getMails().size()];
 			final String fullName = user.getFirstName() + " " + user.getLastName();
-			final String link = "<a href=\"" + configurationResource.get(URL_PUBLIC) + "\">" + configurationResource.get(URL_PUBLIC) + "</a>";
+			final String link = "<a href=\"" + configurationResource.get(URL_PUBLIC) + "\">"
+					+ configurationResource.get(URL_PUBLIC) + "</a>";
 			mimeMessage.setHeader("Content-Type", "text/plain; charset=UTF-8");
-			mimeMessage.setFrom(
-					new InternetAddress(configurationResource.get(MESSAGE_FROM), configurationResource.get(MESSAGE_FROM_TITLE), CharEncoding.UTF_8));
+			mimeMessage.setFrom(new InternetAddress(configurationResource.get(MESSAGE_FROM),
+					configurationResource.get(MESSAGE_FROM_TITLE), CharEncoding.UTF_8));
 			for (int i = 0; i < user.getMails().size(); i++) {
 				internetAddresses[i] = new InternetAddress(user.getMails().get(i), fullName, CharEncoding.UTF_8);
 			}
-			mimeMessage.setSubject(String.format(configurationResource.get(MESSAGE_NEW_SUBJECT), fullName), CharEncoding.UTF_8);
+			mimeMessage.setSubject(String.format(configurationResource.get(MESSAGE_NEW_SUBJECT), fullName),
+					CharEncoding.UTF_8);
 			mimeMessage.setRecipients(Message.RecipientType.TO, internetAddresses);
-			mimeMessage.setContent(String.format(configurationResource.get(MESSAGE_NEW), fullName, user.getId(), password, link, fullName,
-					user.getId(), password, link), "text/html; charset=UTF-8");
+			mimeMessage.setContent(String.format(configurationResource.get(MESSAGE_NEW), fullName, user.getId(),
+					password, link, fullName, user.getId(), password, link), "text/html; charset=UTF-8");
 		});
 	}
 
@@ -314,6 +324,11 @@ public class PasswordResource implements IPasswordGenerator {
 	 */
 	protected IUserRepository getUser() {
 		return iamProvider.getConfiguration().getUserRepository();
+	}
+
+	@Override
+	public String getKey() {
+		return "feature:password";
 	}
 
 }
