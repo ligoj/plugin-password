@@ -468,4 +468,9 @@ public class PasswordResourceTest extends AbstractAppTest {
 		Assert.assertFalse(pattern.matcher("AZERYUI0").matches());
 		Assert.assertFalse(pattern.matcher("AZéRYUI0").matches());
 	}
+	
+	@Test
+	public void getKey() {
+		Assert.assertEquals("feature:password", resource.getKey());
+	}
 }
