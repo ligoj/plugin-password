@@ -9,7 +9,7 @@
 
 	<groupId>org.ligoj.plugin</groupId>
 	<artifactId>plugin-password-management</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<packaging>jar</packaging>
 	<name>Ligoj - Plugin Password Management</name>
 	<description>Plugin to enable password reset and creation with challenge by mail</description>
