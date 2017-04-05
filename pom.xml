@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
 			<artifactId>plugin-mail-smtp</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.1</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
