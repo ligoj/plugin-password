@@ -87,11 +87,11 @@ public class PasswordResourceTest extends AbstractAppTest {
 
 	private PasswordResource newResource() {
 		final PasswordResource resource = new PasswordResource();
-		resource.iamProvider = Mockito.mock(IamProvider.class);
+		resource.iamProvider = new IamProvider[] { Mockito.mock(IamProvider.class) };
 		final IamConfiguration iamConfiguration = Mockito.mock(IamConfiguration.class);
 		final IUserRepository mock = Mockito.mock(IUserRepository.class);
 		Mockito.when(iamConfiguration.getUserRepository()).thenReturn(mock);
-		Mockito.when(resource.iamProvider.getConfiguration()).thenReturn(iamConfiguration);
+		Mockito.when(resource.iamProvider[0].getConfiguration()).thenReturn(iamConfiguration);
 		final ConfigurationResource configuration = Mockito.mock(ConfigurationResource.class);
 		Mockito.when(configuration.get("password.mail.from")).thenReturn("FROM");
 		Mockito.when(configuration.get("password.mail.new.subject")).thenReturn("NEW-%s");
@@ -210,7 +210,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 		final PasswordResource resource = newResource();
 		final MimeMessage message = Mockito.mock(MimeMessage.class);
 		resource.repository = repository;
-		resource.iamProvider = iamProvider;
+		resource.iamProvider = new IamProvider[] { iamProvider };
 		Mockito.when(resource.configurationResource.get("password.mail.url")).thenReturn("host");
 		final MailServicePlugin mailServicePlugin = resource.servicePluginLocator.getResource("service:mail:smtp:local",
 				MailServicePlugin.class);
@@ -468,7 +468,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 		Assert.assertFalse(pattern.matcher("AZERYUI0").matches());
 		Assert.assertFalse(pattern.matcher("AZéRYUI0").matches());
 	}
-	
+
 	@Test
 	public void getKey() {
 		Assert.assertEquals("feature:password", resource.getKey());

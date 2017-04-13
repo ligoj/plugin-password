@@ -66,7 +66,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 * IAM provider.
 	 */
 	@Autowired
-	protected IamProvider iamProvider;
+	protected IamProvider[] iamProvider;
 
 	@Autowired
 	protected SecurityHelper securityHelper;
@@ -323,7 +323,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 * @return User repository provider.
 	 */
 	protected IUserRepository getUser() {
-		return iamProvider.getConfiguration().getUserRepository();
+		return iamProvider[0].getConfiguration().getUserRepository();
 	}
 
 	@Override
