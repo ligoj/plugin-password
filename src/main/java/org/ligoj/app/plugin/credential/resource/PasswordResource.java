@@ -234,7 +234,6 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 * 
 	 * @param uid
 	 *            LDAP UID of user.
-	 * @return the clear generated password.
 	 */
 	@Override
 	public void generate(final String uid) {
