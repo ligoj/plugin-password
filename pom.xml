@@ -14,6 +14,18 @@
 	<name>Ligoj - Plugin Password Management</name>
 	<description>Plugin to enable password reset and creation with challenge by mail</description>
 
+	<profiles>
+		<profile>
+			<id>bintray</id>
+			<distributionManagement>
+				<repository>
+					<id>bintray-ligoj-maven-repo</id>
+					<url>https://api.bintray.com/maven/ligoj/maven-repo/plugin-password/;publish=1</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+	</profiles>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
