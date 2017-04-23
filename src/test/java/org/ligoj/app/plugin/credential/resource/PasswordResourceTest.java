@@ -35,7 +35,6 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.MimeMessagePreparator;
-import org.springframework.security.util.FieldUtils;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -245,8 +244,8 @@ public class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	public void requestRecoveryTooOld() {
 		final PasswordResource resource = newResource();
-		FieldUtils.setProtectedFieldValue("iamProvider", resource, iamProvider);
-		FieldUtils.setProtectedFieldValue("repository", resource, repository);
+		resource.iamProvider = new IamProvider[]{iamProvider};
+		resource.repository = repository;
 
 		// prepare existing request
 		final PasswordReset pwdReset = new PasswordReset();
