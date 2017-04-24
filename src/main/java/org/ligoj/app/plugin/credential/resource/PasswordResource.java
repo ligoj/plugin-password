@@ -1,6 +1,8 @@
 package org.ligoj.app.plugin.credential.resource;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -35,6 +37,7 @@ import org.ligoj.bootstrap.core.SpringUtils;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.security.SecurityHelper;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
+import org.ligoj.bootstrap.model.system.SystemConfiguration;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.MimeMessagePreparator;
@@ -330,4 +333,8 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 		return "feature:password";
 	}
 
+	@Override
+	public List<Class<?>> getInstalledEntities() {
+		return Collections.singletonList(SystemConfiguration.class);
+	}
 }

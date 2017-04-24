@@ -472,4 +472,9 @@ public class PasswordResourceTest extends AbstractAppTest {
 	public void getKey() {
 		Assert.assertEquals("feature:password", resource.getKey());
 	}
+	
+	@Test
+	public void getInstalledEntities() {
+		Assert.assertTrue(resource.getInstalledEntities().contains(SystemConfiguration.class));
+	}
 }
