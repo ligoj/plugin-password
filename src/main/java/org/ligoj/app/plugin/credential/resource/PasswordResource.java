@@ -1,5 +1,6 @@
 package org.ligoj.app.plugin.credential.resource;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -19,9 +20,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.lang3.CharEncoding;
-import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.text.RandomStringGenerator;
 import org.joda.time.DateTime;
 import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.iam.IPasswordGenerator;
@@ -66,6 +67,12 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	private static final String MESSAGE_FROM = "password.mail.from";
 
 	/**
+	 * Az09 string generator.
+	 */
+	private static RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder()
+			.filteredBy(c -> CharUtils.isAsciiAlphanumeric(Character.toChars(c)[0])).build();
+
+	/**
 	 * IAM provider.
 	 */
 	@Autowired
@@ -89,7 +96,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 * @return a generated password.
 	 */
 	public String generate() {
-		return RandomStringUtils.randomAlphanumeric(10);
+		return GENERATOR.generate(10);
 	}
 
 	/**
@@ -190,14 +197,15 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	protected void sendMailReset(final UserOrg user, final String mailTo, final String token) {
 		sendMail(mimeMessage -> {
 			final String fullName = user.getFirstName() + " " + user.getLastName();
-			final InternetAddress internetAddress = new InternetAddress(mailTo, fullName, CharEncoding.UTF_8);
+			final InternetAddress internetAddress = new InternetAddress(mailTo, fullName,
+					StandardCharsets.UTF_8.name());
 			String link = configurationResource.get(URL_PUBLIC) + "#reset=" + token + "/" + user.getId();
 			link = "<a href=\"" + link + "\">" + link + "</a>";
 			mimeMessage.setHeader("Content-Type", "text/plain; charset=UTF-8");
 			mimeMessage.setFrom(new InternetAddress(configurationResource.get(MESSAGE_FROM),
-					configurationResource.get(MESSAGE_FROM_TITLE), CharEncoding.UTF_8));
+					configurationResource.get(MESSAGE_FROM_TITLE), StandardCharsets.UTF_8.name()));
 			mimeMessage.setRecipient(Message.RecipientType.TO, internetAddress);
-			mimeMessage.setSubject(configurationResource.get(SUBJECT), CharEncoding.UTF_8);
+			mimeMessage.setSubject(configurationResource.get(SUBJECT), StandardCharsets.UTF_8.name());
 			mimeMessage.setContent(
 					String.format(configurationResource.get(MESSAGE_RESET), fullName, link, fullName, link),
 					"text/html; charset=UTF-8");
@@ -205,8 +213,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	}
 
 	/**
-	 * Send an email using the default mail node. If no mail is configured,
-	 * nothing happens.
+	 * Send an email using the default mail node. If no mail is configured, nothing happens.
 	 */
 	private void sendMail(final MimeMessagePreparator preparator) {
 		final String node = configurationResource.get(MAIL_NODE);
@@ -232,8 +239,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	}
 
 	/**
-	 * Generate a password for given user. This password is is stored as
-	 * digested in corresponding LDAP entry.
+	 * Generate a password for given user. This password is is stored as digested in corresponding LDAP entry.
 	 * 
 	 * @param uid
 	 *            LDAP UID of user.
@@ -244,8 +250,8 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	}
 
 	/**
-	 * Set the password of given user (UID) and return the generated one. This
-	 * password is stored as digested in corresponding LDAP entry.
+	 * Set the password of given user (UID) and return the generated one. This password is stored as digested in
+	 * corresponding LDAP entry.
 	 * 
 	 * @param uid
 	 *            LDAP UID of user.
@@ -258,8 +264,8 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	}
 
 	/**
-	 * Set the password of given user (UID) and return the generated one. This
-	 * password is stored as digested in corresponding LDAP entry.
+	 * Set the password of given user (UID) and return the generated one. This password is stored as digested in
+	 * corresponding LDAP entry.
 	 * 
 	 * @param uid
 	 *            LDAP UID of user.
@@ -307,12 +313,13 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 					+ configurationResource.get(URL_PUBLIC) + "</a>";
 			mimeMessage.setHeader("Content-Type", "text/plain; charset=UTF-8");
 			mimeMessage.setFrom(new InternetAddress(configurationResource.get(MESSAGE_FROM),
-					configurationResource.get(MESSAGE_FROM_TITLE), CharEncoding.UTF_8));
+					configurationResource.get(MESSAGE_FROM_TITLE), StandardCharsets.UTF_8.name()));
 			for (int i = 0; i < user.getMails().size(); i++) {
-				internetAddresses[i] = new InternetAddress(user.getMails().get(i), fullName, CharEncoding.UTF_8);
+				internetAddresses[i] = new InternetAddress(user.getMails().get(i), fullName,
+						StandardCharsets.UTF_8.name());
 			}
 			mimeMessage.setSubject(String.format(configurationResource.get(MESSAGE_NEW_SUBJECT), fullName),
-					CharEncoding.UTF_8);
+					StandardCharsets.UTF_8.name());
 			mimeMessage.setRecipients(Message.RecipientType.TO, internetAddresses);
 			mimeMessage.setContent(String.format(configurationResource.get(MESSAGE_NEW), fullName, user.getId(),
 					password, link, fullName, user.getId(), password, link), "text/html; charset=UTF-8");
