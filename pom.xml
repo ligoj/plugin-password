@@ -3,13 +3,13 @@
 	<parent>
 		<groupId>org.ligoj.api</groupId>
 		<artifactId>plugin-parent</artifactId>
-		<version>1.0.9</version>
+		<version>1.1.0</version>
 		<relativePath/>
 	</parent>
 
 	<groupId>org.ligoj.plugin</groupId>
 	<artifactId>plugin-password</artifactId>
-	<version>0.0.4-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>jar</packaging>
 	<name>Ligoj - Plugin Password Management</name>
 	<description>Plugin to enable password reset and creation with challenge by mail</description>
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
 			<artifactId>plugin-mail-smtp</artifactId>
-			<version>(0.0.0,1.0.0)</version>
+			<version>[1.0.0,1.1.0)</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
