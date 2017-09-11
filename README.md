@@ -7,7 +7,7 @@
 [![Build Status](https://ci.appveyor.com/api/projects/status/lpm3p8mu0fp7oma8/branch/master?svg=true)](https://ci.appveyor.com/project/ligoj/plugin-password/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/ligoj/plugin-password/badge.svg?branch=master)](https://coveralls.io/github/ligoj/plugin-password?branch=master)
 [![Dependency Status](https://www.versioneye.com/user/projects/58caeda8dcaf9e0041b5b978/badge.svg?style=flat)](https://www.versioneye.com/user/projects/58caeda8dcaf9e0041b5b978)
-[![Quality Gate](https://sonarqube.com/api/badges/gate?key=org.ligoj.plugin:plugin-password)](https://sonarqube.com/dashboard/index/org.ligoj.plugin:plugin-password)
+[![Quality Gate](https://sonarcloud.io/api/badges/gate?key=org.ligoj.plugin:plugin-password)](https://sonarcloud.io/dashboard/index/org.ligoj.plugin:plugin-password)
 [![Sourcegraph Badge](https://sourcegraph.com/github.com/ligoj/plugin-password/-/badge.svg)](https://sourcegraph.com/github.com/ligoj/plugin-password?badge)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4531336334664f9286cb43df834172dd)](https://www.codacy.com/app/ligoj/plugin-password?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/plugin-password&amp;utm_campaign=Badge_Grade)
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/plugin-password/badge)](https://www.codefactor.io/repository/github/ligoj/plugin-password)
