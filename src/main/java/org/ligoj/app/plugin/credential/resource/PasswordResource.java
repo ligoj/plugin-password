@@ -1,13 +1,18 @@
 package org.ligoj.app.plugin.credential.resource;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.mail.Message;
 import javax.mail.internet.InternetAddress;
@@ -248,7 +253,22 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	public void generate(final String uid) {
 		create(uid, generate());
 	}
+	
 
+	/**
+	 * Generate a password for given user and send a mail to the administrator too. This password is is stored as digested in corresponding LDAP entry.
+	 * 
+	 * @param uid
+	 *            LDAP UID of user.
+	 * @param adminUid
+	 * 	          LDAP UID of administrator.
+	 * @return the clear generated password.
+	 */
+	@Override
+	public String generate(final String uid, final String adminUid) {
+		return create(uid, generate(), adminUid);
+	}
+	
 	/**
 	 * Set the password of given user (UID) and return the generated one. This password is stored as digested in
 	 * corresponding LDAP entry.
@@ -263,6 +283,28 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 		return create(uid, password, true);
 	}
 
+	/**
+	 * Set the password of given user (UID) and return the generated one. This password is stored as digested in
+	 * corresponding LDAP entry.
+	 * 
+	 * @param uid
+	 *            LDAP UID of user.
+	 * @param adminUid
+	 * 	          LDAP UID of administrator.
+	 * @param password
+	 *            The password to set.
+	 * @return the clear generated password.
+	 */
+	protected String create(final String uid, final String adminUid, final String password) {
+		final UserOrg userLdap = checkUser(uid);
+		final UserOrg adminLdap = checkUser(adminUid);
+
+		// Replace the old or create a new one
+		getUser().setPassword(userLdap, password);
+		sendMailPassword(userLdap, adminLdap, password);
+		return password;
+	}
+	
 	/**
 	 * Set the password of given user (UID) and return the generated one. This password is stored as digested in
 	 * corresponding LDAP entry.
@@ -306,8 +348,27 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 */
 	protected void sendMailPassword(final SimpleUserOrg user, final String password) {
 		log.info("Sending mail to '{}' at {}", user.getId(), user.getMails());
+		final List<SimpleUserOrg> users = new ArrayList<>();
+		users.add(user);
+		prepareAndSendMail(users, password);
+	}
+	
+	/**
+	 * Send the mail of password to the user and the administrator.
+	 */
+	protected void sendMailPassword(final SimpleUserOrg user, final SimpleUserOrg admin, final String password) {
+		log.info("Sending mail to '{}' and '{}' at {} and {}", user.getId(), user.getMails(), admin.getId(), admin.getMails());
+		final List<SimpleUserOrg> users = new ArrayList<>();
+		users.add(user);
+		users.add(admin);
+		prepareAndSendMail(users, password);
+	}
+
+	private void prepareAndSendMail(final List<SimpleUserOrg> users, final String password) {
 		sendMail(mimeMessage -> {
+			final SimpleUserOrg user = users.remove(0);
 			final InternetAddress[] internetAddresses = new InternetAddress[user.getMails().size()];
+			final Map<String, List<String>> ccMailUsers = users.stream().collect(Collectors.toMap(reciever -> reciever.getFirstName() + " " + reciever.getLastName(), SimpleUserOrg::getMails));
 			final String fullName = user.getFirstName() + " " + user.getLastName();
 			final String link = "<a href=\"" + configurationResource.get(URL_PUBLIC) + "\">"
 					+ configurationResource.get(URL_PUBLIC) + "</a>";
@@ -321,11 +382,24 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 			mimeMessage.setSubject(String.format(configurationResource.get(MESSAGE_NEW_SUBJECT), fullName),
 					StandardCharsets.UTF_8.name());
 			mimeMessage.setRecipients(Message.RecipientType.TO, internetAddresses);
+			mimeMessage.setRecipients(Message.RecipientType.CC, fromMailsToInternetAdresses(ccMailUsers));
 			mimeMessage.setContent(String.format(configurationResource.get(MESSAGE_NEW), fullName, user.getId(),
 					password, link, fullName, user.getId(), password, link), "text/html; charset=UTF-8");
 		});
 	}
 
+	private InternetAddress[] fromMailsToInternetAdresses(final Map<String, List<String>> mailsMap) throws UnsupportedEncodingException {
+		final List<InternetAddress> adresses = new ArrayList<>();
+		for (Entry<String, List<String>> userEntry : mailsMap.entrySet()) {
+			List<String> mails = userEntry.getValue();
+			for (int i = 0; i < mails.size(); i++) {
+				adresses.add(new InternetAddress(mails.get(i), userEntry.getKey(),
+						StandardCharsets.UTF_8.name()));
+			}
+		}
+		return adresses.toArray(new InternetAddress[adresses.size()]);
+	}
+	
 	/**
 	 * User repository provider.
 	 * 
@@ -344,4 +418,5 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	public List<Class<?>> getInstalledEntities() {
 		return Collections.singletonList(SystemConfiguration.class);
 	}
+
 }
