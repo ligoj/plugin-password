@@ -266,7 +266,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 */
 	@Override
 	public String generate(final String uid, final String adminUid) {
-		return create(uid, generate(), adminUid);
+		return create(uid, adminUid, generate());
 	}
 	
 	/**
@@ -297,8 +297,8 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 */
 	protected String create(final String uid, final String adminUid, final String password) {
 		final UserOrg userLdap = checkUser(uid);
-		final UserOrg adminLdap = checkUser(adminUid);
-
+		final UserOrg adminLdap = getUser().findById(adminUid);
+		
 		// Replace the old or create a new one
 		getUser().setPassword(userLdap, password);
 		sendMailPassword(userLdap, adminLdap, password);
