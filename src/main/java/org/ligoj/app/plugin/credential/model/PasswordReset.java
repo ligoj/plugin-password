@@ -24,11 +24,6 @@ import lombok.Setter;
 public class PasswordReset extends AbstractPersistable<Integer> {
 
 	/**
-	 * serial UID
-	 */
-	private static final long serialVersionUID = -2317331866002580938L;
-
-	/**
 	 * User name/login/UID.
 	 */
 	@NotNull
