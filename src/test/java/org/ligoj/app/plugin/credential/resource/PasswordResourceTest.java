@@ -83,13 +83,6 @@ public class PasswordResourceTest extends AbstractAppTest {
 		mockUser(resource, "fdaugan");
 		resource.generate("fdaugan");
 	}
-	
-	@Test
-	public void generateForUserAndAdmin() {
-		final PasswordResource resource = newResource();
-		mockUser(resource, "fdaugan");
-		resource.generate("fdaugan", "fdaugan");
-	}
 
 	private PasswordResource newResource() {
 		final PasswordResource resource = new PasswordResource();
@@ -210,23 +203,6 @@ public class PasswordResourceTest extends AbstractAppTest {
 		Mockito.verify(mailService, Mockito.atLeastOnce()).send(ArgumentMatchers.eq("service:mail:smtp:local"),
 				ArgumentMatchers.any(MimeMessagePreparator.class));
 	}
-	
-	@Test
-	public void sendMailPasswordAdmin() {
-		final PasswordResource resource = newResource();
-
-		exOnPrepare = null;
-		final UserOrg user = new UserOrg();
-		user.setFirstName("John");
-		user.setLastName("Doe");
-		user.setId("fdauganB");
-		user.setMails(Collections.singletonList("f.g@sample.com"));
-		resource.sendMailPassword(user, user, "password");
-		MailServicePlugin mailService = resource.servicePluginLocator.getResource("service:mail:smtp:local",
-				MailServicePlugin.class);
-		Mockito.verify(mailService, Mockito.atLeastOnce()).send(ArgumentMatchers.eq("service:mail:smtp:local"),
-				ArgumentMatchers.any(MimeMessagePreparator.class));
-	}
 
 	@Test
 	public void requestRecovery() throws MessagingException {
@@ -323,7 +299,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	private UserOrg mockUser(final PasswordResource resource, final String login) {
 		final IUserRepository mock = resource.getUser();
 		final UserOrg user = Mockito.mock(UserOrg.class);
-		Mockito.when(mock.findById("fdaugan")).thenReturn(user);
+		Mockito.when(mock.findById(login)).thenReturn(user);
 		Mockito.when(user.getId()).thenReturn(login);
 		Mockito.when(user.getMails()).thenReturn(Collections.emptyList());
 		return user;
