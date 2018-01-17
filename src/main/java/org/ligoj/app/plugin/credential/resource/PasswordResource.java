@@ -218,11 +218,11 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 * nothing happens.
 	 */
 	private void sendMail(final MimeMessagePreparator preparator) {
-		try{
+		try {
 			final String node = configurationResource.get(MAIL_NODE);
 			Optional.ofNullable(servicePluginLocator.getResource(node, MailServicePlugin.class))
-				.map(p -> p.send(node, preparator));
-		} catch(Exception e){
+					.map(p -> p.send(node, preparator));
+		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
 	}

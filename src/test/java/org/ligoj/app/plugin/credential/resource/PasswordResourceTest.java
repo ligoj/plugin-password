@@ -203,6 +203,26 @@ public class PasswordResourceTest extends AbstractAppTest {
 		Mockito.verify(mailService, Mockito.atLeastOnce()).send(ArgumentMatchers.eq("service:mail:smtp:local"),
 				ArgumentMatchers.any(MimeMessagePreparator.class));
 	}
+	
+	
+	@Test
+	public void sendMailPasswordWithException() throws MessagingException {
+		final PasswordResource resource = newResource();
+		Mockito.when(resource.configurationResource.get("password.mail.url")).thenReturn("host");
+		final MailServicePlugin mailServicePlugin = resource.servicePluginLocator.getResource("service:mail:smtp:local",
+				MailServicePlugin.class);
+		Mockito.when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
+				ArgumentMatchers.any(MimeMessagePreparator.class))).thenAnswer(
+						i -> {
+							throw new BusinessException(null, MimeMessagePreparator.class);
+						});
+		final UserOrg user = new UserOrg();
+		user.setFirstName("John");
+		user.setLastName("Doe");
+		user.setId("fdauganB");
+		user.setMails(Collections.singletonList("f.g@sample.com"));
+		resource.sendMailPassword(user, "passwd");
+	}
 
 	@Test
 	public void requestRecovery() throws MessagingException {
