@@ -2,8 +2,8 @@
 set -euo pipefail
 
 #
-# A (too) old version of JDK8 is installed by default on Travis.
-# This method is preferred over Travis apt oracle-java8-installer because
+# A (too) old version of JDK may be installed by default on Travis.
+# This method is preferred over Travis apt installer because
 # JDK is kept in cache. It does not need to be downloaded from Oracle
 # at each build.
 #
