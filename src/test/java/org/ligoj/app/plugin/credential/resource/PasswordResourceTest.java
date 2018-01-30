@@ -12,10 +12,10 @@ import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
 
 import org.joda.time.DateTime;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.ligoj.app.AbstractAppTest;
 import org.ligoj.app.MatcherUtil;
 import org.ligoj.app.iam.IUserRepository;
@@ -37,12 +37,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * Test of {@link PasswordResource}
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
@@ -57,7 +57,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	@Autowired
 	private PasswordResetRepository repository;
 
-	@Before
+	@BeforeEach
 	public void prepareConfiguration() throws IOException {
 		persistEntities("csv", SystemConfiguration.class);
 		exOnPrepare = null;
@@ -66,15 +66,15 @@ public class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	public void generate() {
 		final String password = resource.generate();
-		Assert.assertNotNull(password);
-		Assert.assertEquals(10, password.length());
+		Assertions.assertNotNull(password);
+		Assertions.assertEquals(10, password.length());
 	}
 
 	@Test
 	public void generateForUnknownUser() {
-		thrown.expect(BusinessException.class);
-		thrown.expectMessage("unknown-id");
-		newResource().generate(DEFAULT_USER);
+		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
+			newResource().generate(DEFAULT_USER);
+		}).getMessage());
 	}
 
 	@Test
@@ -109,8 +109,9 @@ public class PasswordResourceTest extends AbstractAppTest {
 		MailServicePlugin mailServicePlugin = Mockito.mock(MailServicePlugin.class);
 		Mockito.when(resource.servicePluginLocator.getResource("service:mail:smtp:local", MailServicePlugin.class))
 				.thenReturn(mailServicePlugin);
-		Mockito.when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
-				ArgumentMatchers.any(MimeMessagePreparator.class))).thenAnswer(a -> {
+		Mockito.when(
+				mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"), ArgumentMatchers.any(MimeMessagePreparator.class)))
+				.thenAnswer(a -> {
 					((MimeMessagePreparator) a.getArguments()[1]).prepare(mockMessage);
 					return (MimeMessagePreparator) a.getArguments()[1];
 				});
@@ -124,8 +125,9 @@ public class PasswordResourceTest extends AbstractAppTest {
 		Mockito.when(resource.configurationResource.get("password.mail.url")).thenReturn("host");
 		final MailServicePlugin mailServicePlugin = resource.servicePluginLocator.getResource("service:mail:smtp:local",
 				MailServicePlugin.class);
-		Mockito.when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
-				ArgumentMatchers.any(MimeMessagePreparator.class))).thenAnswer(
+		Mockito.when(
+				mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"), ArgumentMatchers.any(MimeMessagePreparator.class)))
+				.thenAnswer(
 
 						i -> {
 							MimeMessagePreparator mimeMessagePreparator = (MimeMessagePreparator) i.getArguments()[1];
@@ -143,7 +145,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 		user.setId("fdauganB");
 		user.setMails(Collections.singletonList("f.g@sample.com"));
 		resource.sendMailPassword(user, null);
-		Assert.assertNull(exOnPrepare);
+		Assertions.assertNull(exOnPrepare);
 		Mockito.verify(message, Mockito.atLeastOnce()).setContent(
 				"John Doe-fdauganB-null-<a href=\"host\">host</a>-John Doe-fdauganB-null-<a href=\"host\">host</a>",
 				"text/html; charset=UTF-8");
@@ -153,13 +155,13 @@ public class PasswordResourceTest extends AbstractAppTest {
 	public void requestRecoveryUserNotFound() {
 		final PasswordResource resource = newResource();
 		resource.requestRecovery("fdauganB", "f.d@sample.com");
-		Assert.assertEquals(0, repository.findAll().size());
+		Assertions.assertEquals(0, repository.findAll().size());
 	}
 
 	@Test
 	public void requestRecoveryBadMail() {
 		resource.requestRecovery("fdaugan", "f.d@sample.com");
-		Assert.assertEquals(0, repository.findAll().size());
+		Assertions.assertEquals(0, repository.findAll().size());
 	}
 
 	@Test
@@ -168,7 +170,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 		final UserOrg lockedUser = mockUser(resource, "fdaugan");
 		Mockito.when(lockedUser.getLocked()).thenReturn(new Date());
 		resource.requestRecovery("fdaugan", "f.d@sample.com");
-		Assert.assertEquals(0, repository.findAll().size());
+		Assertions.assertEquals(0, repository.findAll().size());
 		Mockito.verify(lockedUser).getLocked();
 		Mockito.verifyNoMoreInteractions(lockedUser);
 	}
@@ -198,24 +200,22 @@ public class PasswordResourceTest extends AbstractAppTest {
 		user.setId("fdauganB");
 		user.setMails(Collections.singletonList("f.g@sample.com"));
 		resource.sendMailPassword(user, "password");
-		MailServicePlugin mailService = resource.servicePluginLocator.getResource("service:mail:smtp:local",
-				MailServicePlugin.class);
+		MailServicePlugin mailService = resource.servicePluginLocator.getResource("service:mail:smtp:local", MailServicePlugin.class);
 		Mockito.verify(mailService, Mockito.atLeastOnce()).send(ArgumentMatchers.eq("service:mail:smtp:local"),
 				ArgumentMatchers.any(MimeMessagePreparator.class));
 	}
-	
-	
+
 	@Test
-	public void sendMailPasswordWithException() throws MessagingException {
+	public void sendMailPasswordWithException() {
 		final PasswordResource resource = newResource();
 		Mockito.when(resource.configurationResource.get("password.mail.url")).thenReturn("host");
 		final MailServicePlugin mailServicePlugin = resource.servicePluginLocator.getResource("service:mail:smtp:local",
 				MailServicePlugin.class);
-		Mockito.when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
-				ArgumentMatchers.any(MimeMessagePreparator.class))).thenAnswer(
-						i -> {
-							throw new BusinessException(null, MimeMessagePreparator.class);
-						});
+		Mockito.when(
+				mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"), ArgumentMatchers.any(MimeMessagePreparator.class)))
+				.thenAnswer(i -> {
+					throw new BusinessException(null, MimeMessagePreparator.class);
+				});
 		final UserOrg user = new UserOrg();
 		user.setFirstName("John");
 		user.setLastName("Doe");
@@ -233,8 +233,9 @@ public class PasswordResourceTest extends AbstractAppTest {
 		Mockito.when(resource.configurationResource.get("password.mail.url")).thenReturn("host");
 		final MailServicePlugin mailServicePlugin = resource.servicePluginLocator.getResource("service:mail:smtp:local",
 				MailServicePlugin.class);
-		Mockito.when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
-				ArgumentMatchers.any(MimeMessagePreparator.class))).thenAnswer(
+		Mockito.when(
+				mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"), ArgumentMatchers.any(MimeMessagePreparator.class)))
+				.thenAnswer(
 
 						i -> {
 							MimeMessagePreparator mimeMessagePreparator = (MimeMessagePreparator) i.getArguments()[1];
@@ -248,23 +249,22 @@ public class PasswordResourceTest extends AbstractAppTest {
 		resource.requestRecovery("fdaugan", "fDaugaN@sample.com");
 		em.flush();
 
-		Assert.assertNull(exOnPrepare);
+		Assertions.assertNull(exOnPrepare);
 		final List<PasswordReset> requests = repository.findAll();
-		Assert.assertEquals(1, requests.size());
+		Assertions.assertEquals(1, requests.size());
 		final PasswordReset passwordReset = requests.get(0);
-		Assert.assertEquals("fdaugan", passwordReset.getLogin());
+		Assertions.assertEquals("fdaugan", passwordReset.getLogin());
 
 		Mockito.verify(message, Mockito.atLeastOnce())
 				.setContent("First Last-<a href=\"host#reset=" + passwordReset.getToken() + "/fdaugan\">host#reset="
-						+ passwordReset.getToken() + "/fdaugan</a>-First Last-<a href=\"host#reset="
-						+ passwordReset.getToken() + "/fdaugan\">host#reset=" + passwordReset.getToken()
-						+ "/fdaugan</a>", "text/html; charset=UTF-8");
+						+ passwordReset.getToken() + "/fdaugan</a>-First Last-<a href=\"host#reset=" + passwordReset.getToken()
+						+ "/fdaugan\">host#reset=" + passwordReset.getToken() + "/fdaugan</a>", "text/html; charset=UTF-8");
 	}
 
 	@Test
 	public void requestRecoveryTooOld() {
 		final PasswordResource resource = newResource();
-		resource.iamProvider = new IamProvider[]{iamProvider};
+		resource.iamProvider = new IamProvider[] { iamProvider };
 		resource.repository = repository;
 
 		// prepare existing request
@@ -276,10 +276,10 @@ public class PasswordResourceTest extends AbstractAppTest {
 		resource.requestRecovery("fdaugan", "fdaugan@sample.com");
 		em.flush();
 
-		Assert.assertNull(exOnPrepare);
+		Assertions.assertNull(exOnPrepare);
 		final PasswordReset passwordReset = repository.findAll().get(0);
 
-		Assert.assertEquals(pwdReset.getDate(), passwordReset.getDate());
+		Assertions.assertEquals(pwdReset.getDate(), passwordReset.getDate());
 	}
 
 	@Test
@@ -287,31 +287,30 @@ public class PasswordResourceTest extends AbstractAppTest {
 		resource.reset(prepareReset("fdaugan"), "fdaugan");
 
 		// check mocks
-		Assert.assertNull(repository.findByLoginAndTokenAndDateAfter("fdaugan", "t-t-t-t", new Date()));
+		Assertions.assertNull(repository.findByLoginAndTokenAndDateAfter("fdaugan", "t-t-t-t", new Date()));
 		getUser().authenticate("fdaugan", "Strong3r");
 	}
 
 	@Test
 	public void resetInvalidUser() {
-		thrown.expect(BusinessException.class);
-		thrown.expectMessage("unknown-id");
 		final PasswordResource resource = newResource();
 		resource.repository = repository;
-		resource.reset(prepareReset("fdaugan"), "fdaugan");
+		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
+			resource.reset(prepareReset("fdaugan"), "fdaugan");
+		}).getMessage());
 	}
 
 	@Test
 	public void resetLockedUser() {
-		thrown.expect(BusinessException.class);
-		thrown.expectMessage("unknown-id");
-
 		final PasswordResource resource = newResource();
-		Mockito.when(resource.repository.findByLoginAndTokenAndDateAfter(ArgumentMatchers.anyString(),
-				ArgumentMatchers.anyString(), ArgumentMatchers.any(Date.class))).thenReturn(new PasswordReset());
+		Mockito.when(resource.repository.findByLoginAndTokenAndDateAfter(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
+				ArgumentMatchers.any(Date.class))).thenReturn(new PasswordReset());
 		final UserOrg lockedUser = mockUser(resource, "fdaugan");
 		Mockito.when(lockedUser.getLocked()).thenReturn(new Date());
-		resource.reset(prepareReset("fdaugan"), "fdaugan");
-		Assert.assertEquals(0, repository.findAll().size());
+		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
+			resource.reset(prepareReset("fdaugan"), "fdaugan");
+		}).getMessage());
+		Assertions.assertEquals(0, repository.findAll().size());
 		Mockito.verify(lockedUser).getLocked();
 		Mockito.verifyNoMoreInteractions(lockedUser);
 	}
@@ -327,14 +326,13 @@ public class PasswordResourceTest extends AbstractAppTest {
 
 	@Test
 	public void restInvalidToken() {
-		thrown.expect(BusinessException.class);
-		thrown.expectMessage("unknown-id");
-
 		// call business
 		final ResetPasswordByMailChallenge userResetPassword = new ResetPasswordByMailChallenge();
 		userResetPassword.setToken("bad-token");
 		userResetPassword.setPassword("Strong3r");
-		resource.reset(userResetPassword, "mdupont");
+		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
+			resource.reset(userResetPassword, "mdupont");
+		}).getMessage());
 		em.flush();
 	}
 
@@ -356,9 +354,6 @@ public class PasswordResourceTest extends AbstractAppTest {
 
 	@Test
 	public void confirmRecoveryOldToken() {
-		thrown.expect(BusinessException.class);
-		thrown.expectMessage("unknown-id");
-
 		// create dataset
 		final PasswordReset pwdReset = createRequest();
 		repository.save(pwdReset);
@@ -368,22 +363,20 @@ public class PasswordResourceTest extends AbstractAppTest {
 		final ResetPasswordByMailChallenge userResetPassword = new ResetPasswordByMailChallenge();
 		userResetPassword.setToken("t-t-t-t");
 		userResetPassword.setPassword("Strong3r");
-		resource.reset(userResetPassword, "mdupont");
-		Assert.assertEquals(1, repository.count());
-		final PasswordReset passwordReset = repository.findAll().get(0);
-		Assert.assertEquals("mdupont", passwordReset.getLogin());
+		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
+			resource.reset(userResetPassword, "mdupont");
+		}).getMessage());
 	}
 
 	@Test
 	public void updateAuthenticationFailed() {
-		thrown.expect(ValidationJsonException.class);
-		thrown.expect(MatcherUtil.validationMatcher("password", "login"));
-
 		final PasswordResource resource = newResource();
 		final ResetPassword request = new ResetPassword();
 		request.setNewPassword("Strong3r");
 		request.setPassword("any");
-		resource.update(request);
+		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> {
+			resource.update(request);
+		}), "password", "login");
 	}
 
 	@Test
@@ -413,7 +406,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 		resource.cleanRecoveries();
 
 		// check
-		Assert.assertEquals(0, repository.count());
+		Assertions.assertEquals(0, repository.count());
 	}
 
 	@Test
@@ -431,7 +424,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 		resource.cleanRecoveries();
 
 		// check
-		Assert.assertEquals(1, repository.count());
+		Assertions.assertEquals(1, repository.count());
 	}
 
 	@Test
@@ -450,7 +443,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 		resource.cleanRecoveries();
 
 		// check
-		Assert.assertEquals(2, repository.count());
+		Assertions.assertEquals(2, repository.count());
 
 	}
 
@@ -472,29 +465,29 @@ public class PasswordResourceTest extends AbstractAppTest {
 		final Pattern pattern = Pattern.compile(ResetPassword.COMPLEXITY_PATTERN);
 
 		// Accepted password
-		Assert.assertTrue(pattern.matcher("aZ1-----").matches());
-		Assert.assertTrue(pattern.matcher("aZ3rty?;").matches());
-		Assert.assertTrue(pattern.matcher("azertyY2").matches());
-		Assert.assertTrue(pattern.matcher("AZERTYa0").matches());
-		Assert.assertTrue(pattern.matcher("b1234567890&#'{}()[].,;:!|<>-=+*_@$?§/£Y").matches());
-		Assert.assertTrue(pattern.matcher("b0&#$%_-/:µ,.~¤!§*£=+|{}[]?<>;'&B").matches());
+		Assertions.assertTrue(pattern.matcher("aZ1-----").matches());
+		Assertions.assertTrue(pattern.matcher("aZ3rty?;").matches());
+		Assertions.assertTrue(pattern.matcher("azertyY2").matches());
+		Assertions.assertTrue(pattern.matcher("AZERTYa0").matches());
+		Assertions.assertTrue(pattern.matcher("b1234567890&#'{}()[].,;:!|<>-=+*_@$?§/£Y").matches());
+		Assertions.assertTrue(pattern.matcher("b0&#$%_-/:µ,.~¤!§*£=+|{}[]?<>;'&B").matches());
 
 		// Rejected password
-		Assert.assertFalse(pattern.matcher("AZERYa0").matches());
-		Assert.assertFalse(pattern.matcher("AZERYUIO").matches());
-		Assert.assertFalse(pattern.matcher("azertyop").matches());
-		Assert.assertFalse(pattern.matcher("azerty0p").matches());
-		Assert.assertFalse(pattern.matcher("AZERYUI0").matches());
-		Assert.assertFalse(pattern.matcher("AZéRYUI0").matches());
+		Assertions.assertFalse(pattern.matcher("AZERYa0").matches());
+		Assertions.assertFalse(pattern.matcher("AZERYUIO").matches());
+		Assertions.assertFalse(pattern.matcher("azertyop").matches());
+		Assertions.assertFalse(pattern.matcher("azerty0p").matches());
+		Assertions.assertFalse(pattern.matcher("AZERYUI0").matches());
+		Assertions.assertFalse(pattern.matcher("AZéRYUI0").matches());
 	}
 
 	@Test
 	public void getKey() {
-		Assert.assertEquals("feature:password", resource.getKey());
+		Assertions.assertEquals("feature:password", resource.getKey());
 	}
-	
+
 	@Test
 	public void getInstalledEntities() {
-		Assert.assertTrue(resource.getInstalledEntities().contains(SystemConfiguration.class));
+		Assertions.assertTrue(resource.getInstalledEntities().contains(SystemConfiguration.class));
 	}
 }
