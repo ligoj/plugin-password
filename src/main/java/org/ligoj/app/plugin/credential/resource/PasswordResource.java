@@ -310,6 +310,8 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	/**
 	 * Send the mail of password to the user.
+	 * @param user The target recipient.
+	 * @param password The exposed password.
 	 */
 	protected void sendMailPassword(final SimpleUserOrg user, final String password) {
 		log.info("Sending mail to '{}' at {}", user.getId(), user.getMails());
