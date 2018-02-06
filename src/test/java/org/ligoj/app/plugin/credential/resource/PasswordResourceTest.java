@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
+import javax.ws.rs.WebApplicationException;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Assertions;
@@ -154,14 +155,16 @@ public class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	public void requestRecoveryUserNotFound() {
 		final PasswordResource resource = newResource();
-		resource.requestRecovery("fdauganB", "f.d@sample.com");
-		Assertions.assertEquals(0, repository.findAll().size());
+		Assertions.assertThrows(WebApplicationException.class, () -> {
+			resource.requestRecovery("fdaugan", "f.d@sample.com");
+		});
 	}
 
 	@Test
 	public void requestRecoveryBadMail() {
-		resource.requestRecovery("fdaugan", "f.d@sample.com");
-		Assertions.assertEquals(0, repository.findAll().size());
+		Assertions.assertThrows(WebApplicationException.class, () -> {
+			resource.requestRecovery("fdaugan", "f.d@sample.com");
+		});
 	}
 
 	@Test
@@ -169,10 +172,10 @@ public class PasswordResourceTest extends AbstractAppTest {
 		final PasswordResource resource = newResource();
 		final UserOrg lockedUser = mockUser(resource, "fdaugan");
 		Mockito.when(lockedUser.getLocked()).thenReturn(new Date());
-		resource.requestRecovery("fdaugan", "f.d@sample.com");
-		Assertions.assertEquals(0, repository.findAll().size());
-		Mockito.verify(lockedUser).getLocked();
-		Mockito.verifyNoMoreInteractions(lockedUser);
+		
+		Assertions.assertThrows(WebApplicationException.class, () -> {
+			resource.requestRecovery("fdaugan", "f.d@sample.com");
+		});
 	}
 
 	@Test
@@ -264,22 +267,22 @@ public class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	public void requestRecoveryTooOld() {
 		final PasswordResource resource = newResource();
-		resource.iamProvider = new IamProvider[] { iamProvider };
 		resource.repository = repository;
+		final UserOrg user = mockUser(resource, "fdaugan");
+		Mockito.when(user.getMails()).thenReturn(Collections.singletonList("fdaugan@sample.com"));
 
 		// prepare existing request
 		final PasswordReset pwdReset = new PasswordReset();
 		pwdReset.setDate(new Date());
 		pwdReset.setLogin("fdaugan");
 		pwdReset.setToken("t-t-t-t");
-		repository.save(pwdReset);
-		resource.requestRecovery("fdaugan", "fdaugan@sample.com");
-		em.flush();
-
-		Assertions.assertNull(exOnPrepare);
+		repository.saveAndFlush(pwdReset);
 		final PasswordReset passwordReset = repository.findAll().get(0);
-
 		Assertions.assertEquals(pwdReset.getDate(), passwordReset.getDate());
+		
+		Assertions.assertThrows(WebApplicationException.class, () -> {
+			resource.requestRecovery("fdaugan", "fdaugan@sample.com");
+		});
 	}
 
 	@Test
@@ -310,7 +313,6 @@ public class PasswordResourceTest extends AbstractAppTest {
 		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
 			resource.reset(prepareReset("fdaugan"), "fdaugan");
 		}).getMessage());
-		Assertions.assertEquals(0, repository.findAll().size());
 		Mockito.verify(lockedUser).getLocked();
 		Mockito.verifyNoMoreInteractions(lockedUser);
 	}
