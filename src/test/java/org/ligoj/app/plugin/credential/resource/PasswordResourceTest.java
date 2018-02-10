@@ -73,7 +73,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	public void generateForUnknownUser() {
 		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
-			newResource().generate(DEFAULT_USER);
+			newResource().generate(DEFAULT_USER, true);
 		}).getMessage());
 	}
 
@@ -81,7 +81,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	public void generateForUser() {
 		final PasswordResource resource = newResource();
 		mockUser(resource, "fdaugan");
-		resource.generate("fdaugan");
+		resource.generate("fdaugan", true);
 	}
 
 	private PasswordResource newResource() {

@@ -117,7 +117,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 		}
 
 		// Update password
-		create(login, request.getNewPassword(), false);
+		create(login, request.getNewPassword(), true);
 	}
 
 	/**
@@ -141,7 +141,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 		}
 
 		// Check the user and update his/her password
-		create(uid, request.getPassword(), false);
+		create(uid, request.getPassword(), true);
 
 		// Remove password reset request since this token is no more valid
 		repository.delete(passwordReset);
@@ -250,10 +250,12 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 * 
 	 * @param uid
 	 *            LDAP UID of user.
+	 * @param quiet
+	 *            Flag to turn-off the possible notification such as mail.
 	 */
 	@Override
-	public String generate(final String uid) {
-		return create(uid, generate());
+	public String generate(final String uid, final boolean quiet) {
+		return create(uid, generate(), quiet);
 	}
 
 	/**
@@ -264,30 +266,16 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 *            LDAP UID of user.
 	 * @param password
 	 *            The password to set.
+	 * @param quiet
+	 *            Flag to turn-off the possible notification such as mail.
 	 * @return the clear generated password.
 	 */
-	protected String create(final String uid, final String password) {
-		return create(uid, password, true);
-	}
-
-	/**
-	 * Set the password of given user (UID) and return the generated one. This
-	 * password is stored as digested in corresponding LDAP entry.
-	 * 
-	 * @param uid
-	 *            LDAP UID of user.
-	 * @param password
-	 *            The password to set.
-	 * @param sendMail
-	 *            send a mail if true.
-	 * @return the clear generated password.
-	 */
-	protected String create(final String uid, final String password, final boolean sendMail) {
+	private String create(final String uid, final String password, final boolean quiet) {
 		final UserOrg userLdap = checkUser(uid);
 
 		// Replace the old or create a new one
 		getUser().setPassword(userLdap, password);
-		if (sendMail) {
+		if (!quiet) {
 			sendMailPassword(userLdap, password);
 		}
 		return password;
