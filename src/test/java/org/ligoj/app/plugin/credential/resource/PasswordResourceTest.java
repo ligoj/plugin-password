@@ -11,6 +11,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,6 +69,18 @@ public class PasswordResourceTest extends AbstractAppTest {
 		final String password = resource.generate();
 		Assertions.assertNotNull(password);
 		Assertions.assertEquals(10, password.length());
+		Assertions.assertTrue(StringUtils.containsAny(password, "0123456789"));
+		Assertions.assertTrue(StringUtils.containsAny(password, "abcdefghijklmnopqrstuvwxyz")
+				|| StringUtils.containsAny(password, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+		Assertions.assertTrue(resource.isAcceptedClasses(password));
+	}
+
+	@Test
+	public void isAcceptedClasses() {
+		Assertions.assertFalse(resource.isAcceptedClasses("ab"));
+		Assertions.assertFalse(resource.isAcceptedClasses("12"));
+		Assertions.assertTrue(resource.isAcceptedClasses("a1"));
+		Assertions.assertTrue(resource.isAcceptedClasses("1b"));
 	}
 
 	@Test
@@ -187,14 +200,15 @@ public class PasswordResourceTest extends AbstractAppTest {
 				"text/html; charset=UTF-8");
 	}
 
-	@Test 
+	@Test
 	void sendMailNoMailPlugin() {
 		final PasswordResource resource = new PasswordResource();
 		resource.servicePluginLocator = Mockito.mock(ServicePluginLocator.class);
 		resource.configuration = Mockito.mock(ConfigurationResource.class);
 		Mockito.doReturn("service:mail:deleted-plug-in").when(resource.configuration).get("password.mail.node");
 		resource.sendMail(null);
-		Mockito.verify(resource.servicePluginLocator).getResource("service:mail:deleted-plug-in", MailServicePlugin.class);
+		Mockito.verify(resource.servicePluginLocator).getResource("service:mail:deleted-plug-in",
+				MailServicePlugin.class);
 	}
 
 	@Test

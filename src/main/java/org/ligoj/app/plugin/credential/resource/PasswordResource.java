@@ -92,12 +92,27 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	protected ServicePluginLocator servicePluginLocator;
 
 	/**
-	 * Generate a random password.
+	 * Generate a random password having at least one digit and one letter.
 	 * 
-	 * @return a generated password.
+	 * @return A generated password.
 	 */
 	public String generate() {
-		return GENERATOR.generate(10);
+		String value = null;
+		do {
+			value = GENERATOR.generate(10);
+		} while (!isAcceptedClasses(value));
+		return value;
+	}
+
+	/**
+	 * Indicate the given password suits to the minimal security regarding only the character classes.
+	 * 
+	 * @param value
+	 *            The password to check.
+	 * @return <code>true</code> when enough complex.
+	 */
+	protected boolean isAcceptedClasses(final String value) {
+		return value.matches(".*\\d.*") && value.matches(".*[a-zA-Z].*");
 	}
 
 	/**
@@ -293,7 +308,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 * @param uid
 	 *            UID of user.
 	 * @param quiet
-	 *            Flag to turn-off the possible notification such as mail.
+	 *            Flag to turn-off the possible notification such as mail. Never <code>null</code>.
 	 */
 	@Override
 	public String generate(final String uid, final boolean quiet) {
