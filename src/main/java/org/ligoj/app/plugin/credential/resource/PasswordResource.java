@@ -132,8 +132,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	@Path("reset/{uid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void reset(final ResetPasswordByMailChallenge request, @PathParam("uid") final String uid) {
-		// check token in database : Invalid token, or out-dated, or invalid
-		// user ?
+		// check token in database : Invalid token, or out-dated, or invalid user ?
 		final PasswordReset passwordReset = repository.findByLoginAndTokenAndDateAfter(uid, request.getToken(),
 				DateTime.now().minusHours(NumberUtils.INTEGER_ONE).toDate());
 		if (passwordReset == null) {
@@ -212,19 +211,63 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	}
 
 	/**
+	 * Send the mail of password to the user.
+	 * 
+	 * @param user
+	 *            The target recipient.
+	 * @param password
+	 *            The exposed password.
+	 */
+	protected void sendMailPassword(final SimpleUserOrg user, final String password) {
+		log.info("Sending mail to '{}' at {}", user.getId(), user.getMails());
+		prepareAndSendMail(user, password);
+	}
+
+	private void prepareAndSendMail(final SimpleUserOrg user, final String password) {
+		sendMail(message -> {
+			final String fullName = user.getFirstName() + " " + user.getLastName();
+			final InternetAddress[] addresses = getUserInternetAdresses(user, fullName);
+			final String charset = StandardCharsets.UTF_8.name();
+			final String link = "<a href=\"" + configuration.get(URL_PUBLIC) + "\">" + configuration.get(URL_PUBLIC)
+					+ "</a>";
+			message.setHeader("Content-Type", "text/plain; charset=UTF-8");
+			message.setFrom(new InternetAddress(configuration.get(MESSAGE_FROM), configuration.get(MESSAGE_FROM_TITLE),
+					charset));
+			message.setSubject(String.format(configuration.get(MESSAGE_NEW_SUBJECT), fullName), charset);
+			message.setRecipients(Message.RecipientType.TO, addresses);
+			message.setContent(String.format(configuration.get(MESSAGE_NEW), fullName, user.getId(), password, link,
+					fullName, user.getId(), password, link), "text/html; charset=UTF-8");
+		});
+	}
+
+	private InternetAddress[] getUserInternetAdresses(final SimpleUserOrg user, final String fullName)
+			throws UnsupportedEncodingException {
+		final InternetAddress[] internetAddresses = new InternetAddress[user.getMails().size()];
+		for (int i = 0; i < user.getMails().size(); i++) {
+			internetAddresses[i] = new InternetAddress(user.getMails().get(i), fullName, StandardCharsets.UTF_8.name());
+		}
+		return internetAddresses;
+	}
+
+	/**
 	 * Send an email using the default mail node. If no mail is configured, nothing happens.
 	 */
-	private void sendMail(final MimeMessagePreparator preparator) {
+	protected void sendMail(final MimeMessagePreparator preparator) {
+		final String node = configuration.get(MAIL_NODE);
 		try {
-			final String node = configuration.get(MAIL_NODE);
 			final Class<?> mailService = ClassUtils.getClass("org.ligoj.app.plugin.mail.resource.MailServicePlugin",
 					true);
+			// "plugin-mail" plug-in is available, locate the node
 			final Object plugin = servicePluginLocator.getResource(node, mailService);
-			if (plugin != null) {
+			if (plugin == null) {
+				// Node is not available: fail safe mode, deleted plug-in, ...
+				log.info("Unable to send the password mail using node {}: not available", node);
+			} else {
+				// Node is available, send the mail through it
 				MethodUtils.invokeMethod(plugin, "send", node, preparator);
 			}
-		} catch (Exception e) {
-			log.error(e.getMessage());
+		} catch (final Exception e) {
+			log.error("Unable to send the password mail using node {}: {}", node, e.getMessage());
 		}
 	}
 
@@ -294,45 +337,6 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 			throw new BusinessException(BusinessException.KEY_UNKNOW_ID, uid);
 		}
 		return user;
-	}
-
-	/**
-	 * Send the mail of password to the user.
-	 * 
-	 * @param user
-	 *            The target recipient.
-	 * @param password
-	 *            The exposed password.
-	 */
-	protected void sendMailPassword(final SimpleUserOrg user, final String password) {
-		log.info("Sending mail to '{}' at {}", user.getId(), user.getMails());
-		prepareAndSendMail(user, password);
-	}
-
-	private void prepareAndSendMail(final SimpleUserOrg user, final String password) {
-		sendMail(mimeMessage -> {
-			final String fullName = user.getFirstName() + " " + user.getLastName();
-			final InternetAddress[] internetAddresses = getUserInternetAdresses(user, fullName);
-			final String link = "<a href=\"" + configuration.get(URL_PUBLIC) + "\">" + configuration.get(URL_PUBLIC)
-					+ "</a>";
-			mimeMessage.setHeader("Content-Type", "text/plain; charset=UTF-8");
-			mimeMessage.setFrom(new InternetAddress(configuration.get(MESSAGE_FROM),
-					configuration.get(MESSAGE_FROM_TITLE), StandardCharsets.UTF_8.name()));
-			mimeMessage.setSubject(String.format(configuration.get(MESSAGE_NEW_SUBJECT), fullName),
-					StandardCharsets.UTF_8.name());
-			mimeMessage.setRecipients(Message.RecipientType.TO, internetAddresses);
-			mimeMessage.setContent(String.format(configuration.get(MESSAGE_NEW), fullName, user.getId(), password, link,
-					fullName, user.getId(), password, link), "text/html; charset=UTF-8");
-		});
-	}
-
-	private InternetAddress[] getUserInternetAdresses(final SimpleUserOrg user, final String fullName)
-			throws UnsupportedEncodingException {
-		final InternetAddress[] internetAddresses = new InternetAddress[user.getMails().size()];
-		for (int i = 0; i < user.getMails().size(); i++) {
-			internetAddresses[i] = new InternetAddress(user.getMails().get(i), fullName, StandardCharsets.UTF_8.name());
-		}
-		return internetAddresses;
 	}
 
 	/**
