@@ -99,7 +99,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 		Mockito.when(configuration.get("password.mail.reset.subject")).thenReturn("RESET-%s");
 		Mockito.when(configuration.get("password.mail.node")).thenReturn("service:mail:smtp:local");
 		Mockito.when(configuration.get("password.mail.url")).thenReturn("host");
-		resource.configurationResource = configuration;
+		resource.configuration = configuration;
 		resource.repository = Mockito.mock(PasswordResetRepository.class);
 		resource.servicePluginLocator = Mockito.mock(ServicePluginLocator.class);
 		resource.securityHelper = Mockito.mock(SecurityHelper.class);
@@ -122,7 +122,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	public void sendMailPasswordNoPassword() throws MessagingException {
 		final PasswordResource resource = newResource();
 		final MimeMessage message = Mockito.mock(MimeMessage.class);
-		Mockito.when(resource.configurationResource.get("password.mail.url")).thenReturn("host");
+		Mockito.when(resource.configuration.get("password.mail.url")).thenReturn("host");
 		final MailServicePlugin mailServicePlugin = resource.servicePluginLocator.getResource("service:mail:smtp:local",
 				MailServicePlugin.class);
 		Mockito.when(
@@ -208,7 +208,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	public void sendMailPasswordWithException() {
 		final PasswordResource resource = newResource();
-		Mockito.when(resource.configurationResource.get("password.mail.url")).thenReturn("host");
+		Mockito.when(resource.configuration.get("password.mail.url")).thenReturn("host");
 		final MailServicePlugin mailServicePlugin = resource.servicePluginLocator.getResource("service:mail:smtp:local",
 				MailServicePlugin.class);
 		Mockito.when(
@@ -230,7 +230,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 		final MimeMessage message = Mockito.mock(MimeMessage.class);
 		resource.repository = repository;
 		resource.iamProvider = new IamProvider[] { iamProvider };
-		Mockito.when(resource.configurationResource.get("password.mail.url")).thenReturn("host");
+		Mockito.when(resource.configuration.get("password.mail.url")).thenReturn("host");
 		final MailServicePlugin mailServicePlugin = resource.servicePluginLocator.getResource("service:mail:smtp:local",
 				MailServicePlugin.class);
 		Mockito.when(
@@ -307,6 +307,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 				ArgumentMatchers.any(Date.class))).thenReturn(new PasswordReset());
 		final UserOrg lockedUser = mockUser(resource, "fdaugan");
 		Mockito.when(lockedUser.getLocked()).thenReturn(new Date());
+		Assertions.assertEquals(0, repository.findAll().size());
 		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
 			resource.reset(prepareReset("fdaugan"), "fdaugan");
 		}).getMessage());
