@@ -22,6 +22,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.commons.text.RandomStringGenerator;
@@ -282,7 +283,8 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 				MethodUtils.invokeMethod(plugin, "send", node, preparator);
 			}
 		} catch (final Exception e) {
-			log.error("Unable to send the password mail using node {}: {}", node, e.getMessage());
+			log.error("Unable to send the password mail using node {}: {}", node,
+					ExceptionUtils.getRootCause(e).getMessage());
 		}
 	}
 
