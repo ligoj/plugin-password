@@ -328,9 +328,10 @@ public class PasswordResourceTest extends AbstractAppTest {
 				ArgumentMatchers.any(Date.class))).thenReturn(new PasswordReset());
 		final UserOrg lockedUser = mockUser(resource, "fdaugan");
 		Mockito.when(lockedUser.getLocked()).thenReturn(new Date());
-		final ResetPasswordByMailChallenge prepareReset = prepareReset("fdaugan");
+		resource.reset(prepareReset("fdaugan"), "fdaugan");
 		Assertions.assertEquals(1, repository.findAll().size());
-		resource.reset(prepareReset, "fdaugan");
+		Mockito.verify(lockedUser).getLocked();
+		Mockito.verifyNoMoreInteractions(lockedUser);
 	}
 
 	private UserOrg mockUser(final PasswordResource resource, final String login) {
