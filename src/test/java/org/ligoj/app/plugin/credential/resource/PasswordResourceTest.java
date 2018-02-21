@@ -66,21 +66,25 @@ public class PasswordResourceTest extends AbstractAppTest {
 
 	@Test
 	public void generate() {
-		final String password = resource.generate();
-		Assertions.assertNotNull(password);
-		Assertions.assertEquals(10, password.length());
-		Assertions.assertTrue(StringUtils.containsAny(password, "0123456789"));
-		Assertions.assertTrue(StringUtils.containsAny(password, "abcdefghijklmnopqrstuvwxyz")
-				|| StringUtils.containsAny(password, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
-		Assertions.assertTrue(resource.isAcceptedClasses(password));
+		for (int i = 100; i-- > 0;) {
+			final String password = resource.generate();
+			Assertions.assertNotNull(password);
+			Assertions.assertEquals(10, password.length());
+			Assertions.assertTrue(StringUtils.containsAny(password, "0123456789"));
+			Assertions.assertTrue(StringUtils.containsAny(password, "abcdefghijklmnopqrstuvwxyz"));
+			Assertions.assertTrue(StringUtils.containsAny(password, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+			Assertions.assertTrue(resource.isAcceptedClasses(password));
+		}
 	}
 
 	@Test
 	public void isAcceptedClasses() {
-		Assertions.assertFalse(resource.isAcceptedClasses("ab"));
-		Assertions.assertFalse(resource.isAcceptedClasses("12"));
-		Assertions.assertTrue(resource.isAcceptedClasses("a1"));
-		Assertions.assertTrue(resource.isAcceptedClasses("1b"));
+		Assertions.assertFalse(resource.isAcceptedClasses("abcdefghIJ"));
+		Assertions.assertFalse(resource.isAcceptedClasses("0123456789"));
+		Assertions.assertFalse(resource.isAcceptedClasses("0124567Ab"));
+		Assertions.assertTrue(resource.isAcceptedClasses("01234567Ab"));
+		Assertions.assertTrue(resource.isAcceptedClasses("01234567aB"));
+		Assertions.assertTrue(resource.isAcceptedClasses("0@#1)#b/A="));
 	}
 
 	@Test
@@ -94,7 +98,16 @@ public class PasswordResourceTest extends AbstractAppTest {
 	public void generateForUser() {
 		final PasswordResource resource = newResource();
 		mockUser(resource, "fdaugan");
-		resource.generate("fdaugan", false);
+		Assertions.assertTrue(resource.isAcceptedClasses(resource.generate("fdaugan", false)));
+	}
+
+	@Test
+	public void generateForUserQuite() {
+		final PasswordResource resource = newResource();
+		mockUser(resource, "fdaugan");
+		UserOrg userOrg = resource.getUser().findById("fdaugan");
+		Mockito.verify(userOrg, Mockito.never()).getMails();
+		Assertions.assertTrue(resource.isAcceptedClasses(resource.generate("fdaugan", true)));
 	}
 
 	private PasswordResource newResource() {
@@ -112,6 +125,10 @@ public class PasswordResourceTest extends AbstractAppTest {
 		Mockito.when(configuration.get("password.mail.reset.subject")).thenReturn("RESET-%s");
 		Mockito.when(configuration.get("password.mail.node")).thenReturn("service:mail:smtp:local");
 		Mockito.when(configuration.get("password.mail.url")).thenReturn("host");
+		Mockito.when(configuration.get(PasswordResource.PASSWORD_GEN_LENGTH, 10)).thenReturn(10);
+		Mockito.when(
+				configuration.get(PasswordResource.PASSWORD_VALIDATOR, PasswordResource.PASSWORD_VALIDATOR_DEFAULT))
+				.thenReturn(PasswordResource.PASSWORD_VALIDATOR_DEFAULT);
 		resource.configuration = configuration;
 		resource.repository = Mockito.mock(PasswordResetRepository.class);
 		resource.servicePluginLocator = Mockito.mock(ServicePluginLocator.class);
@@ -324,8 +341,8 @@ public class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	public void resetLockedUser() {
 		final PasswordResource resource = newResource();
-		Mockito.when(resource.repository.findByLoginAndTokenAndDateAfter(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
-				ArgumentMatchers.any(Date.class))).thenReturn(new PasswordReset());
+		Mockito.when(resource.repository.findByLoginAndTokenAndDateAfter(ArgumentMatchers.anyString(),
+				ArgumentMatchers.anyString(), ArgumentMatchers.any(Date.class))).thenReturn(new PasswordReset());
 		final UserOrg lockedUser = mockUser(resource, "fdaugan");
 		Mockito.when(lockedUser.getLocked()).thenReturn(new Date());
 		resource.reset(prepareReset("fdaugan"), "fdaugan");

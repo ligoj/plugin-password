@@ -69,6 +69,26 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	private static final String MESSAGE_FROM = "password.mail.from";
 
 	/**
+	 * Configuration key to of generated password length
+	 */
+	public static final String PASSWORD_GEN_LENGTH = "password.strength.gen.length";
+
+	/**
+	 * The default generated password length.
+	 */
+	public static final int PASSWORD_GEN_LENGTH_DEFAULT = 10;;
+
+	/**
+	 * Configuration key to of password validation (regular expression)
+	 */
+	public static final String PASSWORD_VALIDATOR = "password.strength.validation";
+
+	/**
+	 * The default password validation regular expression.
+	 */
+	public static final String PASSWORD_VALIDATOR_DEFAULT = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{10,}$";
+
+	/**
 	 * Az09 string generator.
 	 */
 	private static RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder()
@@ -100,7 +120,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	public String generate() {
 		String value = null;
 		do {
-			value = GENERATOR.generate(10);
+			value = GENERATOR.generate(configuration.get(PASSWORD_GEN_LENGTH, PASSWORD_GEN_LENGTH_DEFAULT));
 		} while (!isAcceptedClasses(value));
 		return value;
 	}
@@ -113,7 +133,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 * @return <code>true</code> when enough complex.
 	 */
 	protected boolean isAcceptedClasses(final String value) {
-		return value.matches(".*\\d.*") && value.matches(".*[a-zA-Z].*");
+		return value.matches(configuration.get(PASSWORD_VALIDATOR, PASSWORD_VALIDATOR_DEFAULT));
 	}
 
 	/**
@@ -132,7 +152,6 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 			throw new ValidationJsonException("password", "login");
 		}
 
-		
 		// Update password
 		getUser().setPassword(user, request.getPassword(), request.getNewPassword());
 	}
