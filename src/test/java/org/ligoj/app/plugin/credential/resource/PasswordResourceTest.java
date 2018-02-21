@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
-import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -166,16 +165,14 @@ public class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	public void requestRecoveryUserNotFound() {
 		final PasswordResource resource = newResource();
-		Assertions.assertThrows(WebApplicationException.class, () -> {
-			resource.requestRecovery("fdaugan", "f.d@sample.com");
-		});
+		resource.requestRecovery("fdauganB", "f.d@sample.com");
+		Assertions.assertEquals(0, repository.findAll().size());
 	}
 
 	@Test
 	public void requestRecoveryBadMail() {
-		Assertions.assertThrows(WebApplicationException.class, () -> {
-			resource.requestRecovery("fdaugan", "f.d@sample.com");
-		});
+		resource.requestRecovery("fdaugan", "f.d@sample.com");
+		Assertions.assertEquals(0, repository.findAll().size());
 	}
 
 	@Test
@@ -183,10 +180,10 @@ public class PasswordResourceTest extends AbstractAppTest {
 		final PasswordResource resource = newResource();
 		final UserOrg lockedUser = mockUser(resource, "fdaugan");
 		Mockito.when(lockedUser.getLocked()).thenReturn(new Date());
-		
-		Assertions.assertThrows(WebApplicationException.class, () -> {
-			resource.requestRecovery("fdaugan", "f.d@sample.com");
-		});
+		resource.requestRecovery("fdaugan", "f.d@sample.com");
+		Assertions.assertEquals(0, repository.findAll().size());
+		Mockito.verify(lockedUser).getLocked();
+		Mockito.verifyNoMoreInteractions(lockedUser);
 	}
 
 	@Test
@@ -290,21 +287,22 @@ public class PasswordResourceTest extends AbstractAppTest {
 	public void requestRecoveryTooOld() {
 		final PasswordResource resource = newResource();
 		resource.repository = repository;
-		final UserOrg user = mockUser(resource, "fdaugan");
-		Mockito.when(user.getMails()).thenReturn(Collections.singletonList("fdaugan@sample.com"));
+		resource.iamProvider = new IamProvider[] { iamProvider };
+		resource.repository = repository;
 
 		// prepare existing request
 		final PasswordReset pwdReset = new PasswordReset();
 		pwdReset.setDate(new Date());
 		pwdReset.setLogin("fdaugan");
 		pwdReset.setToken("t-t-t-t");
-		repository.saveAndFlush(pwdReset);
+		repository.save(pwdReset);
+		resource.requestRecovery("fdaugan", "fdaugan@sample.com");
+		em.flush();
+
+		Assertions.assertNull(exOnPrepare);
 		final PasswordReset passwordReset = repository.findAll().get(0);
+
 		Assertions.assertEquals(pwdReset.getDate(), passwordReset.getDate());
-		
-		Assertions.assertThrows(WebApplicationException.class, () -> {
-			resource.requestRecovery("fdaugan", "fdaugan@sample.com");
-		});
 	}
 
 	@Test
@@ -320,23 +318,18 @@ public class PasswordResourceTest extends AbstractAppTest {
 	public void resetInvalidUser() {
 		final PasswordResource resource = newResource();
 		resource.repository = repository;
-		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
-			resource.reset(prepareReset("fdaugan"), "fdaugan");
-		}).getMessage());
+		resource.reset(prepareReset("fdaugan"), "fdaugan");
 	}
 
 	@Test
 	public void resetLockedUser() {
 		final PasswordResource resource = newResource();
-		Mockito.when(resource.repository.findByLoginAndTokenAndDateAfter(ArgumentMatchers.anyString(),
-				ArgumentMatchers.anyString(), ArgumentMatchers.any(Date.class))).thenReturn(new PasswordReset());
+		Mockito.when(resource.repository.findByLoginAndTokenAndDateAfter(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
+				ArgumentMatchers.any(Date.class))).thenReturn(new PasswordReset());
 		final UserOrg lockedUser = mockUser(resource, "fdaugan");
 		Mockito.when(lockedUser.getLocked()).thenReturn(new Date());
-		final ResetPasswordByMailChallenge prepareReset = prepareReset("fdaugan");
+		resource.reset(prepareReset("fdaugan"), "fdaugan");
 		Assertions.assertEquals(1, repository.findAll().size());
-		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
-			resource.reset(prepareReset, "fdaugan");
-		}).getMessage());
 		Mockito.verify(lockedUser).getLocked();
 		Mockito.verifyNoMoreInteractions(lockedUser);
 	}

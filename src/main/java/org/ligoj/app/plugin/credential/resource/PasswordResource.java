@@ -126,7 +126,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void update(final ResetPassword request) {
 		final String login = securityHelper.getLogin();
-		final UserOrg userLdap = getUser().findById(login);
+		final UserOrg user = getUser().findById(login);
 		// Check user and password
 		if (!getUser().authenticate(login, request.getPassword())) {
 			throw new ValidationJsonException("password", "login");
@@ -134,7 +134,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 		
 		// Update password
-		getUser().setPassword(userLdap, request.getPassword(), request.getNewPassword());
+		getUser().setPassword(user, request.getPassword(), request.getNewPassword());
 	}
 
 	/**
@@ -157,11 +157,13 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 		}
 
 		// Check the user and update his/her password
-		final UserOrg userLdap = getUser().findById(uid);
-		getUser().setPassword(userLdap, null, request.getPassword());
+		final UserOrg user = getUser().findById(uid);
+		if (user != null && user.getLocked() == null) {
+			getUser().setPassword(user, null, request.getPassword());
 
-		// Remove password reset request since this token is no more valid
-		repository.delete(passwordReset);
+			// Remove password reset request since this token is no more valid
+			repository.delete(passwordReset);
+		}
 	}
 
 	/**
