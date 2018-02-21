@@ -29,9 +29,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-mail-smtp</artifactId>
+			<artifactId>plugin-mail</artifactId>
 			<version>[1.0.0,1.1.0)</version>
 			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 		
 		<!-- JSR-919 Remove with API 1.1.3-->
