@@ -76,7 +76,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	/**
 	 * The default generated password length.
 	 */
-	public static final int PASSWORD_GEN_LENGTH_DEFAULT = 10;;
+	public static final int PASSWORD_GEN_LENGTH_DEFAULT = 10;
 
 	/**
 	 * Configuration key to of password validation (regular expression)
@@ -91,7 +91,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	/**
 	 * Az09 string generator.
 	 */
-	private static RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder()
+	private static final RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder()
 			.filteredBy(c -> CharUtils.isAsciiAlphanumeric(Character.toChars(c)[0])).build();
 
 	/**
