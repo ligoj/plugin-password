@@ -102,6 +102,14 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
+	public void generateForLockedUser() {
+		final PasswordResource resource = newResource();
+		Mockito.when(mockUser(resource, "fdaugan").getLocked()).thenReturn(new Date());
+		Assertions.assertEquals("unknown-id", Assertions
+				.assertThrows(BusinessException.class, () -> resource.generate("fdaugan", false)).getMessage());
+	}
+
+	@Test
 	public void generateForUserQuite() {
 		final PasswordResource resource = newResource();
 		mockUser(resource, "fdaugan");
