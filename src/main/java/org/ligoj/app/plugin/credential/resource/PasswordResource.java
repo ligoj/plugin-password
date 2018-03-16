@@ -36,7 +36,6 @@ import org.ligoj.app.iam.UserOrg;
 import org.ligoj.app.plugin.credential.dao.PasswordResetRepository;
 import org.ligoj.app.plugin.credential.model.PasswordReset;
 import org.ligoj.app.resource.ServicePluginLocator;
-import org.ligoj.bootstrap.core.SpringUtils;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.security.SecurityHelper;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
@@ -111,6 +110,12 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	@Autowired
 	protected ServicePluginLocator servicePluginLocator;
+
+	/**
+	 * Used for "this" and forcing proxying.
+	 */
+	@Autowired
+	private PasswordResource self;
 
 	/**
 	 * Generate a random password having at least one digit and one letter.
@@ -317,7 +322,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	@Scheduled(cron = "0 0 1 1/1 * ?")
 	public void cleanRecoveries() {
 		// @Modifying + @Scheduled + @Transactional [+protected] --> No TX
-		SpringUtils.getBean(PasswordResource.class).cleanRecoveriesInternal();
+		self.cleanRecoveriesInternal();
 	}
 
 	/**
