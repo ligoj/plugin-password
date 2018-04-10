@@ -9,7 +9,7 @@
 [![Quality Gate](https://sonarcloud.io/api/badges/gate?key=org.ligoj.plugin:plugin-password)](https://sonarcloud.io/dashboard/index/org.ligoj.plugin:plugin-password)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4531336334664f9286cb43df834172dd)](https://www.codacy.com/app/ligoj/plugin-password?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/plugin-password&amp;utm_campaign=Badge_Grade)
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/plugin-password/badge)](https://www.codefactor.io/repository/github/ligoj/plugin-password)
-[![License](http://img.shields.io/:license-mit-blue.svg)](http://gus.mit-license.org/)
+[![License](http://img.shields.io/:license-mit-blue.svg)](http://fabdouglas.mit-license.org/)
 
 [Ligoj](https://github.com/ligoj/ligoj) Password Management plugin
 This plugin does not hold password, only tokens for renew request. The storage is delegated to [plugin-id](https://github.com/ligoj/plugin-id) 
