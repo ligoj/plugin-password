@@ -1,6 +1,7 @@
 package org.ligoj.app.plugin.credential.resource;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -12,7 +13,6 @@ import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +27,7 @@ import org.ligoj.app.plugin.credential.dao.PasswordResetRepository;
 import org.ligoj.app.plugin.credential.model.PasswordReset;
 import org.ligoj.app.plugin.mail.resource.MailServicePlugin;
 import org.ligoj.app.resource.ServicePluginLocator;
+import org.ligoj.bootstrap.core.DateUtils;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.security.SecurityHelper;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
@@ -478,7 +479,9 @@ public class PasswordResourceTest extends AbstractAppTest {
 		pwdReset1.setDate(new Date());
 		repository.save(pwdReset1);
 		final PasswordReset pwdReset2 = createRequest();
-		pwdReset2.setDate(DateTime.now().minusHours(1).toDate());
+		final Calendar calendar = DateUtils.newCalendar();
+		calendar.add(Calendar.HOUR, -1);
+		pwdReset2.setDate(calendar.getTime());
 		pwdReset2.setLogin(DEFAULT_USER);
 		repository.save(pwdReset2);
 		em.flush();

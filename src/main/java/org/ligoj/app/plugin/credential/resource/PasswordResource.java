@@ -2,6 +2,7 @@ package org.ligoj.app.plugin.credential.resource;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -23,10 +24,8 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.commons.text.RandomStringGenerator;
-import org.joda.time.DateTime;
 import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.iam.IPasswordGenerator;
 import org.ligoj.app.iam.IUserRepository;
@@ -36,6 +35,7 @@ import org.ligoj.app.iam.UserOrg;
 import org.ligoj.app.plugin.credential.dao.PasswordResetRepository;
 import org.ligoj.app.plugin.credential.model.PasswordReset;
 import org.ligoj.app.resource.ServicePluginLocator;
+import org.ligoj.bootstrap.core.DateUtils;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.security.SecurityHelper;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
@@ -174,8 +174,10 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void reset(final ResetPasswordByMailChallenge request, @PathParam("uid") final String uid) {
 		// check token in database : Invalid token, or out-dated, or invalid user ?
+		final Calendar calendar = DateUtils.newCalendar();
+		calendar.add(Calendar.HOUR, -1);
 		final PasswordReset passwordReset = repository.findByLoginAndTokenAndDateAfter(uid, request.getToken(),
-				DateTime.now().minusHours(NumberUtils.INTEGER_ONE).toDate());
+				calendar.getTime());
 		if (passwordReset == null) {
 			throw new BusinessException(BusinessException.KEY_UNKNOW_ID);
 		}
@@ -207,8 +209,10 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 			// Case insensitive match
 			final Set<String> mails = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 			mails.addAll(user.getMails());
+			final Calendar calendar = DateUtils.newCalendar();
+			calendar.add(Calendar.MINUTE, 5);
 			if (!mails.add(mail)
-					&& repository.findByLoginAndDateAfter(uid, DateTime.now().minusMinutes(5).toDate()) == null) {
+					&& repository.findByLoginAndDateAfter(uid, calendar.getTime()) == null) {
 				// We accept password reset only if no request has been done for 5 minutes
 				createPasswordReset(uid, mail, user, UUID.randomUUID().toString());
 			}
@@ -329,7 +333,9 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 * Clean old recovery requests
 	 */
 	public void cleanRecoveriesInternal() {
-		repository.deleteByDateBefore(DateTime.now().minusDays(1).toDate());
+		final Calendar calendar = DateUtils.newCalendar();
+		calendar.add(Calendar.DATE, -1);
+		repository.deleteByDateBefore(calendar.getTime());
 	}
 
 	/**
