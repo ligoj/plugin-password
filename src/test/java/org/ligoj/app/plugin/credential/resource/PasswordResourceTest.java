@@ -129,8 +129,8 @@ public class PasswordResourceTest extends AbstractAppTest {
 		final ConfigurationResource configuration = Mockito.mock(ConfigurationResource.class);
 		Mockito.when(configuration.get("password.mail.from")).thenReturn("FROM");
 		Mockito.when(configuration.get("password.mail.new.subject")).thenReturn("NEW-%s");
-		Mockito.when(configuration.get("password.mail.new.content")).thenReturn("%s-%s-%s-%s-%s-%s-%s-%s");
-		Mockito.when(configuration.get("password.mail.reset.content")).thenReturn("%s-%s-%s-%s");
+		Mockito.when(configuration.get("password.mail.new.content")).thenReturn("%s-%s-%s-%s-%s-%s-%s");
+		Mockito.when(configuration.get("password.mail.reset.content")).thenReturn("%s-%s-%s");
 		Mockito.when(configuration.get("password.mail.reset.subject")).thenReturn("RESET-%s");
 		Mockito.when(configuration.get("password.mail.node")).thenReturn("service:mail:smtp:local");
 		Mockito.when(configuration.get("password.mail.url")).thenReturn("host");
@@ -184,7 +184,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 		resource.sendMailPassword(user, null);
 		Assertions.assertNull(exOnPrepare);
 		Mockito.verify(message, Mockito.atLeastOnce()).setContent(
-				"John Doe-fdauganB-null-<a href=\"host\">host</a>-John Doe-fdauganB-null-<a href=\"host\">host</a>",
+				"John Doe-fdauganB-null-<a href=\"host\">host</a>-fdauganB-null-<a href=\"host\">host</a>",
 				"text/html; charset=UTF-8");
 	}
 
@@ -222,7 +222,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 		user.setMails(Collections.singletonList("f.g@sample.com"));
 		resource.sendMailReset(user, "mail", "token");
 		Mockito.verify(mockMessage, Mockito.atLeastOnce()).setContent(
-				"John Doe-<a href=\"host#reset=token/fdauganB\">host#reset=token/fdauganB</a>-John Doe-<a href=\"host#reset=token/fdauganB\">host#reset=token/fdauganB</a>",
+				"John Doe-<a href=\"host#reset=token/fdauganB\">host#reset=token/fdauganB</a>-<a href=\"host#reset=token/fdauganB\">host#reset=token/fdauganB</a>",
 				"text/html; charset=UTF-8");
 	}
 
@@ -304,7 +304,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 
 		Mockito.verify(message, Mockito.atLeastOnce())
 				.setContent("First Last-<a href=\"host#reset=" + passwordReset.getToken() + "/fdaugan\">host#reset="
-						+ passwordReset.getToken() + "/fdaugan</a>-First Last-<a href=\"host#reset="
+						+ passwordReset.getToken() + "/fdaugan</a>-<a href=\"host#reset="
 						+ passwordReset.getToken() + "/fdaugan\">host#reset=" + passwordReset.getToken()
 						+ "/fdaugan</a>", "text/html; charset=UTF-8");
 	}
