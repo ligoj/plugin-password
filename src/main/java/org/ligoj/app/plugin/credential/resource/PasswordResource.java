@@ -253,7 +253,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 					StandardCharsets.UTF_8.name()));
 			message.setRecipient(Message.RecipientType.TO, internetAddress);
 			message.setSubject(configuration.get(SUBJECT), StandardCharsets.UTF_8.name());
-			message.setContent(String.format(configuration.get(MESSAGE_RESET), fullName, link, fullName, link),
+			message.setContent(String.format(configuration.get(MESSAGE_RESET), fullName, link, link),
 					"text/html; charset=UTF-8");
 		});
 	}
@@ -283,8 +283,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 					charset));
 			message.setSubject(String.format(configuration.get(MESSAGE_NEW_SUBJECT), fullName), charset);
 			message.setRecipients(Message.RecipientType.TO, addresses);
-			message.setContent(String.format(configuration.get(MESSAGE_NEW), fullName, user.getId(), password, link,
-					fullName, user.getId(), password, link), "text/html; charset=UTF-8");
+			message.setContent(String.format(configuration.get(MESSAGE_NEW), fullName, user.getId(), password, link, user.getId(), password, link), "text/html; charset=UTF-8");
 		});
 	}
 
