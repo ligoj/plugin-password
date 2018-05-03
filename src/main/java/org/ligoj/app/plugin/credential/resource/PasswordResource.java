@@ -298,6 +298,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	/**
 	 * Send an email using the default mail node. If no mail is configured, nothing happens.
+	 * @param preparator Message delegate.
 	 */
 	protected void sendMail(final MimeMessagePreparator preparator) {
 		final String node = configuration.get(MAIL_NODE);
