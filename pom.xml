@@ -1,10 +1,12 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.ligoj.api</groupId>
 		<artifactId>plugin-parent</artifactId>
 		<version>2.3.0</version>
-		<relativePath/>
+		<relativePath />
 	</parent>
 
 	<groupId>org.ligoj.plugin</groupId>
@@ -13,6 +15,10 @@
 	<packaging>jar</packaging>
 	<name>Ligoj - Plugin Password Management</name>
 	<description>Plugin to enable password reset and creation with challenge by mail</description>
+
+	<properties>
+		<sonar.sources>src/main/java</sonar.sources>
+	</properties>
 
 	<profiles>
 		<profile>
@@ -34,7 +40,7 @@
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>
