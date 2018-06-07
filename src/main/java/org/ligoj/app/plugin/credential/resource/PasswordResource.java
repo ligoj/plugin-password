@@ -122,7 +122,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	/**
 	 * Generate a random password having at least one digit and one letter.
-	 * 
+	 *
 	 * @return A generated password.
 	 */
 	public String generate() {
@@ -135,7 +135,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	/**
 	 * Indicate the given password suits to the minimal security regarding only the character classes.
-	 * 
+	 *
 	 * @param value
 	 *            The password to check.
 	 * @return <code>true</code> when enough complex.
@@ -146,7 +146,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	/**
 	 * Update user password for current user.
-	 * 
+	 *
 	 * @param request
 	 *            the user request.
 	 */
@@ -166,7 +166,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	/**
 	 * Reset password from a mail challenge :token + mail + user name.
-	 * 
+	 *
 	 * @param request
 	 *            the user request.
 	 * @param uid
@@ -197,7 +197,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	/**
 	 * Manage user password recovery with valid user name and mail.
-	 * 
+	 *
 	 * @param uid
 	 *            user identifier.
 	 * @param mail
@@ -213,9 +213,8 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 			final Set<String> mails = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 			mails.addAll(user.getMails());
 			final Calendar calendar = DateUtils.newCalendar();
-			calendar.add(Calendar.MINUTE, 5);
-			if (!mails.add(mail)
-					&& repository.findByLoginAndDateAfter(uid, calendar.getTime()) == null) {
+			calendar.add(Calendar.MINUTE, -5);
+			if (mails.contains(mail) && repository.findByLoginAndDateAfter(uid, calendar.getTime()) == null) {
 				// We accept password reset only if no request has been done for 5 minutes
 				createPasswordReset(uid, mail, user, UUID.randomUUID().toString());
 			}
@@ -236,7 +235,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	/**
 	 * Send mail for reset request
-	 * 
+	 *
 	 * @param user
 	 *            User account.
 	 * @param mailTo
@@ -263,7 +262,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	/**
 	 * Send the mail of password to the user.
-	 * 
+	 *
 	 * @param user
 	 *            The target recipient.
 	 * @param password
@@ -286,7 +285,8 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 					charset));
 			message.setSubject(String.format(configuration.get(MESSAGE_NEW_SUBJECT), fullName), charset);
 			message.setRecipients(Message.RecipientType.TO, addresses);
-			message.setContent(String.format(configuration.get(MESSAGE_NEW), fullName, user.getId(), password, link, user.getId(), password, link), "text/html; charset=UTF-8");
+			message.setContent(String.format(configuration.get(MESSAGE_NEW), fullName, user.getId(), password, link,
+					user.getId(), password, link), "text/html; charset=UTF-8");
 		});
 	}
 
@@ -301,7 +301,9 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	/**
 	 * Send an email using the default mail node. If no mail is configured, nothing happens.
-	 * @param preparator Message delegate.
+	 *
+	 * @param preparator
+	 *            Message delegate.
 	 */
 	protected void sendMail(final MimeMessagePreparator preparator) {
 		final String node = configuration.get(MAIL_NODE);
@@ -343,7 +345,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	/**
 	 * Generate a password for given user. This password is is stored as digested in corresponding user entry.
-	 * 
+	 *
 	 * @param uid
 	 *            UID of user.
 	 * @param quiet
@@ -357,7 +359,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	/**
 	 * Set the password of given user (UID) and return the generated one. This password is stored as digested in
 	 * corresponding user entry.
-	 * 
+	 *
 	 * @param uid
 	 *            UID of user.
 	 * @param password
@@ -379,7 +381,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	/**
 	 * Check the user exists and return it.
-	 * 
+	 *
 	 * @param uid
 	 *            UID of user to lookup.
 	 * @return {@link UserOrg} User entry. Never <code>null</code>.
@@ -395,7 +397,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	/**
 	 * User repository provider.
-	 * 
+	 *
 	 * @return User repository provider.
 	 */
 	protected IUserRepository getUser() {

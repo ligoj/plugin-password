@@ -296,6 +296,8 @@ public class PasswordResourceTest extends AbstractAppTest {
 							}
 							return mimeMessagePreparator;
 						});
+
+		// Test with case insensitive mail
 		resource.requestRecovery("fdaugan", "fDaugaN@sample.com");
 		em.flush();
 
@@ -313,7 +315,34 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void requestRecoveryTooOld() {
+	public void requestRecoveryRenewTooRecent() {
+		// Too recent previous request
+		final Calendar calendar = DateUtils.newCalendar();
+		calendar.add(Calendar.MINUTE, -2);
+		requestRecovery(calendar.getTime());
+
+		Assertions.assertNull(exOnPrepare);
+		final PasswordReset passwordReset = repository.findAll().get(0);
+
+		//Check the reset date has not been updated
+		Assertions.assertEquals(calendar.getTime(), passwordReset.getDate());
+	}
+
+	@Test
+	public void requestRecoveryRenewValid() {
+		 // Very old initial reset
+		final Calendar calendar = DateUtils.newCalendar();
+		calendar.add(Calendar.DATE, -2);
+		requestRecovery(new Date(0));
+		Assertions.assertNull(exOnPrepare);
+		final PasswordReset passwordReset = repository.findAll().get(0);
+
+		//Check the reset date has been updated
+		Assertions.assertNotEquals(calendar.getTime(), passwordReset.getDate());
+		Assertions.assertTrue(passwordReset.getDate().getTime() - 1000 < DateUtils.newCalendar().getTimeInMillis());
+	}
+
+	private void requestRecovery(final Date resetDate) {
 		final PasswordResource resource = newResource();
 		resource.repository = repository;
 		resource.iamProvider = new IamProvider[] { iamProvider };
@@ -321,17 +350,12 @@ public class PasswordResourceTest extends AbstractAppTest {
 
 		// prepare existing request
 		final PasswordReset pwdReset = new PasswordReset();
-		pwdReset.setDate(new Date());
+		pwdReset.setDate(resetDate);
 		pwdReset.setLogin("fdaugan");
 		pwdReset.setToken("t-t-t-t");
 		repository.save(pwdReset);
 		resource.requestRecovery("fdaugan", "fdaugan@sample.com");
 		em.flush();
-
-		Assertions.assertNull(exOnPrepare);
-		final PasswordReset passwordReset = repository.findAll().get(0);
-
-		Assertions.assertEquals(pwdReset.getDate(), passwordReset.getDate());
 	}
 
 	@Test
@@ -499,7 +523,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 
 	/**
 	 * create basic data
-	 * 
+	 *
 	 * @return password reset
 	 */
 	private PasswordReset createRequest() {
