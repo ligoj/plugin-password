@@ -5,10 +5,10 @@ package org.ligoj.app.plugin.credential.dao;
 
 import java.util.Date;
 
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.ligoj.app.plugin.credential.model.PasswordReset;
 import org.ligoj.bootstrap.core.dao.RestRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 /**
  * {@link PasswordReset} repository
