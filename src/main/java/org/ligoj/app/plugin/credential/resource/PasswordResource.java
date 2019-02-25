@@ -134,6 +134,19 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	}
 
 	/**
+	 * Generate a password for given user. This password is is stored as digested in corresponding user entry.
+	 *
+	 * @param uid
+	 *            UID of user.
+	 * @param quiet
+	 *            Flag to turn-off the possible notification such as mail. Never <code>null</code>.
+	 */
+	@Override
+	public String generate(final String uid, final boolean quiet) {
+		return create(uid, generate(), quiet);
+	}
+
+	/**
 	 * Indicate the given password suits to the minimal security regarding only the character classes.
 	 *
 	 * @param value
@@ -341,19 +354,6 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 		final Calendar calendar = DateUtils.newCalendar();
 		calendar.add(Calendar.DATE, -1);
 		repository.deleteByDateBefore(calendar.getTime());
-	}
-
-	/**
-	 * Generate a password for given user. This password is is stored as digested in corresponding user entry.
-	 *
-	 * @param uid
-	 *            UID of user.
-	 * @param quiet
-	 *            Flag to turn-off the possible notification such as mail. Never <code>null</code>.
-	 */
-	@Override
-	public String generate(final String uid, final boolean quiet) {
-		return create(uid, generate(), quiet);
 	}
 
 	/**

@@ -314,6 +314,22 @@ public class PasswordResourceTest extends AbstractAppTest {
 						+ "/fdaugan</a>", "text/html; charset=UTF-8");
 	}
 
+	private void requestRecovery(final Date resetDate) {
+		final PasswordResource resource = newResource();
+		resource.repository = repository;
+		resource.iamProvider = new IamProvider[] { iamProvider };
+		resource.repository = repository;
+
+		// prepare existing request
+		final PasswordReset pwdReset = new PasswordReset();
+		pwdReset.setDate(resetDate);
+		pwdReset.setLogin("fdaugan");
+		pwdReset.setToken("t-t-t-t");
+		repository.save(pwdReset);
+		resource.requestRecovery("fdaugan", "fdaugan@sample.com");
+		em.flush();
+	}
+
 	@Test
 	public void requestRecoveryRenewTooRecent() {
 		// Too recent previous request
@@ -340,22 +356,6 @@ public class PasswordResourceTest extends AbstractAppTest {
 		//Check the reset date has been updated
 		Assertions.assertNotEquals(calendar.getTime(), passwordReset.getDate());
 		Assertions.assertTrue(passwordReset.getDate().getTime() - 1000 < DateUtils.newCalendar().getTimeInMillis());
-	}
-
-	private void requestRecovery(final Date resetDate) {
-		final PasswordResource resource = newResource();
-		resource.repository = repository;
-		resource.iamProvider = new IamProvider[] { iamProvider };
-		resource.repository = repository;
-
-		// prepare existing request
-		final PasswordReset pwdReset = new PasswordReset();
-		pwdReset.setDate(resetDate);
-		pwdReset.setLogin("fdaugan");
-		pwdReset.setToken("t-t-t-t");
-		repository.save(pwdReset);
-		resource.requestRecovery("fdaugan", "fdaugan@sample.com");
-		em.flush();
 	}
 
 	@Test
