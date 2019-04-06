@@ -131,10 +131,12 @@ public class PasswordResourceTest extends AbstractAppTest {
 		Mockito.when(resource.iamProvider[0].getConfiguration()).thenReturn(iamConfiguration);
 		final ConfigurationResource configuration = Mockito.mock(ConfigurationResource.class);
 		Mockito.when(configuration.get("password.mail.from")).thenReturn("FROM");
-		Mockito.when(configuration.get("password.mail.new.subject")).thenReturn("NEW-%s");
-		Mockito.when(configuration.get("password.mail.new.content")).thenReturn("%s-%s-%s-%s-%s-%s-%s");
-		Mockito.when(configuration.get("password.mail.reset.content")).thenReturn("%s-%s-%s");
-		Mockito.when(configuration.get("password.mail.reset.subject")).thenReturn("RESET-%s");
+		Mockito.when(configuration.get("password.mail.new.subject")).thenReturn("NEW-$FULLNAME");
+		Mockito.when(configuration.get("password.mail.new.content"))
+				.thenReturn("new-$FULLNAME,$FIRSTNAME,$LASTNAME,$LINK,$ID,$COMPANY");
+		Mockito.when(configuration.get("password.mail.reset.content"))
+				.thenReturn("reset-$FULLNAME,$FIRSTNAME,$LASTNAME,$LINK,$ID,$COMPANY");
+		Mockito.when(configuration.get("password.mail.reset.subject")).thenReturn("RESET-$FULLNAME");
 		Mockito.when(configuration.get("password.mail.node")).thenReturn("service:mail:smtp:local");
 		Mockito.when(configuration.get("password.mail.url")).thenReturn("host");
 		Mockito.when(configuration.get(PasswordResource.PASSWORD_GEN_LENGTH, 10)).thenReturn(10);
@@ -187,7 +189,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 		resource.sendMailPassword(user, null);
 		Assertions.assertNull(exOnPrepare);
 		Mockito.verify(message, Mockito.atLeastOnce()).setContent(
-				"John Doe-fdauganB-null-<a href=\"host\">host</a>-fdauganB-null-<a href=\"host\">host</a>",
+				"new-John Doe,John,Doe,host,fdauganB,",
 				"text/html; charset=UTF-8");
 	}
 
@@ -225,7 +227,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 		user.setMails(Collections.singletonList("f.g@sample.com"));
 		resource.sendMailReset(user, "mail", "token");
 		Mockito.verify(mockMessage, Mockito.atLeastOnce()).setContent(
-				"John Doe-<a href=\"host#reset=token/fdauganB\">host#reset=token/fdauganB</a>-<a href=\"host#reset=token/fdauganB\">host#reset=token/fdauganB</a>",
+				"reset-John Doe,John,Doe,host#reset=token/fdauganB,fdauganB,",
 				"text/html; charset=UTF-8");
 	}
 
@@ -308,10 +310,8 @@ public class PasswordResourceTest extends AbstractAppTest {
 		Assertions.assertEquals("fdaugan", passwordReset.getLogin());
 
 		Mockito.verify(message, Mockito.atLeastOnce())
-				.setContent("First Last-<a href=\"host#reset=" + passwordReset.getToken() + "/fdaugan\">host#reset="
-						+ passwordReset.getToken() + "/fdaugan</a>-<a href=\"host#reset="
-						+ passwordReset.getToken() + "/fdaugan\">host#reset=" + passwordReset.getToken()
-						+ "/fdaugan</a>", "text/html; charset=UTF-8");
+				.setContent("reset-First Last,First,Last,host#reset=" + passwordReset.getToken() + "/fdaugan,fdaugan,",
+						"text/html; charset=UTF-8");
 	}
 
 	private void requestRecovery(final Date resetDate) {
@@ -340,20 +340,20 @@ public class PasswordResourceTest extends AbstractAppTest {
 		Assertions.assertNull(exOnPrepare);
 		final PasswordReset passwordReset = repository.findAll().get(0);
 
-		//Check the reset date has not been updated
+		// Check the reset date has not been updated
 		Assertions.assertEquals(calendar.getTime(), passwordReset.getDate());
 	}
 
 	@Test
 	public void requestRecoveryRenewValid() {
-		 // Very old initial reset
+		// Very old initial reset
 		final Calendar calendar = DateUtils.newCalendar();
 		calendar.add(Calendar.DATE, -2);
 		requestRecovery(new Date(0));
 		Assertions.assertNull(exOnPrepare);
 		final PasswordReset passwordReset = repository.findAll().get(0);
 
-		//Check the reset date has been updated
+		// Check the reset date has been updated
 		Assertions.assertNotEquals(calendar.getTime(), passwordReset.getDate());
 		Assertions.assertTrue(passwordReset.getDate().getTime() - 1000 < DateUtils.newCalendar().getTimeInMillis());
 	}

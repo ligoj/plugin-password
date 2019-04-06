@@ -8,10 +8,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.mail.Message;
 import javax.mail.internet.InternetAddress;
@@ -26,6 +29,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.commons.text.RandomStringGenerator;
@@ -258,18 +262,15 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 */
 	protected void sendMailReset(final UserOrg user, final String mailTo, final String token) {
 		sendMail(message -> {
-			final String fullName = user.getFirstName() + " " + user.getLastName();
-			final InternetAddress internetAddress = new InternetAddress(mailTo, fullName,
-					StandardCharsets.UTF_8.name());
-			String link = configuration.get(URL_PUBLIC) + "#reset=" + token + "/" + user.getId();
-			link = "<a href=\"" + link + "\">" + link + "</a>";
+			final Map<String, String> values = toMap(user);
+			values.put("LINK", values.get("LINK") + "#reset=" + token + "/" + user.getId());
 			message.setHeader("Content-Type", "text/plain; charset=UTF-8");
 			message.setFrom(new InternetAddress(configuration.get(MESSAGE_FROM), configuration.get(MESSAGE_FROM_TITLE),
 					StandardCharsets.UTF_8.name()));
-			message.setRecipient(Message.RecipientType.TO, internetAddress);
+			message.setRecipient(Message.RecipientType.TO,
+					new InternetAddress(mailTo, values.get("FULLNAME"), StandardCharsets.UTF_8.name()));
 			message.setSubject(configuration.get(SUBJECT), StandardCharsets.UTF_8.name());
-			message.setContent(String.format(configuration.get(MESSAGE_RESET), fullName, link, link),
-					"text/html; charset=UTF-8");
+			message.setContent(format(MESSAGE_RESET, values), "text/html; charset=UTF-8");
 		});
 	}
 
@@ -288,19 +289,35 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	private void prepareAndSendMail(final SimpleUserOrg user, final String password) {
 		sendMail(message -> {
-			final String fullName = user.getFirstName() + " " + user.getLastName();
-			final InternetAddress[] addresses = getUserInternetAdresses(user, fullName);
+			final Map<String, String> values = toMap(user);
+			values.put("PASSWORD", password);
+			final InternetAddress[] addresses = getUserInternetAdresses(user, values.get("FULLNAME"));
 			final String charset = StandardCharsets.UTF_8.name();
-			final String link = "<a href=\"" + configuration.get(URL_PUBLIC) + "\">" + configuration.get(URL_PUBLIC)
-					+ "</a>";
 			message.setHeader("Content-Type", "text/plain; charset=UTF-8");
 			message.setFrom(new InternetAddress(configuration.get(MESSAGE_FROM), configuration.get(MESSAGE_FROM_TITLE),
 					charset));
-			message.setSubject(String.format(configuration.get(MESSAGE_NEW_SUBJECT), fullName), charset);
 			message.setRecipients(Message.RecipientType.TO, addresses);
-			message.setContent(String.format(configuration.get(MESSAGE_NEW), fullName, user.getId(), password, link,
-					user.getId(), password, link), "text/html; charset=UTF-8");
+			message.setSubject(format(MESSAGE_NEW_SUBJECT, values), charset);
+			message.setContent(format(MESSAGE_NEW, values), "text/html; charset=UTF-8");
 		});
+	}
+
+	private Map<String, String> toMap(final SimpleUserOrg user) {
+		final Map<String, String> values = new HashMap<>();
+		values.put("ID", user.getId());
+		values.put("FIRSTNAME", user.getFirstName());
+		values.put("LASTNAME", user.getLastName());
+		values.put("COMPANY", user.getCompany());
+		values.put("FULLNAME", user.getFirstName() + " " + user.getLastName());
+		values.put("LINK", StringUtils.removeEnd(configuration.get(URL_PUBLIC), "/"));
+		return values;
+	}
+
+	private String format(final String key, final Map<String, String> values) {
+		final AtomicReference<String> cursor = new AtomicReference<>(configuration.get(key));
+		values.entrySet().forEach(
+				e -> cursor.getAndUpdate(s -> s.replace("$" + e.getKey(), StringUtils.trimToEmpty(e.getValue()))));
+		return cursor.get();
 	}
 
 	private InternetAddress[] getUserInternetAdresses(final SimpleUserOrg user, final String fullName)
