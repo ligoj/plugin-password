@@ -4,7 +4,7 @@
 [![Build Status](https://circleci.com/gh/ligoj/plugin-password.svg?style=svg)](https://circleci.com/gh/ligoj/plugin-password)
 [![Build Status](https://semaphoreci.com/api/v1/ligoj/plugin-password/branches/master/shields_badge.svg)](https://semaphoreci.com/ligoj/plugin-password)
 [![Build Status](https://ci.appveyor.com/api/projects/status/lpm3p8mu0fp7oma8/branch/master?svg=true)](https://ci.appveyor.com/project/ligoj/plugin-password/branch/master)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.ligoj.plugin%3plugin-password&metric=coverage)](https://sonarcloud.io/component_measures/metric/coverage/list?id=org.ligoj.plugin%3plugin-password)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.ligoj.plugin%3Aplugin-password&metric=coverage)](https://sonarcloud.io/dashboard?id=org.ligoj.plugin%3Aplugin-password)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?metric=alert_status&project=org.ligoj.plugin:plugin-password)](https://sonarcloud.io/dashboard/index/org.ligoj.plugin:plugin-password)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4531336334664f9286cb43df834172dd)](https://www.codacy.com/app/ligoj/plugin-password?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/plugin-password&amp;utm_campaign=Badge_Grade)
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/plugin-password/badge)](https://www.codefactor.io/repository/github/ligoj/plugin-password)
