@@ -199,7 +199,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 		final PasswordReset passwordReset = repository.findByLoginAndTokenAndDateAfter(uid, request.getToken(),
 				calendar.getTime());
 		if (passwordReset == null) {
-			throw new BusinessException(BusinessException.KEY_UNKNOW_ID);
+			throw new BusinessException(BusinessException.KEY_UNKNOWN_ID);
 		}
 
 		// Check the user and update his/her password
@@ -407,7 +407,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 		final UserOrg user = getUser().findById(uid);
 		if (user == null || user.getLocked() != null) {
 			// Locked users are read-only
-			throw new BusinessException(BusinessException.KEY_UNKNOW_ID, uid);
+			throw new BusinessException(BusinessException.KEY_UNKNOWN_ID, uid);
 		}
 		return user;
 	}
