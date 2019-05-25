@@ -51,7 +51,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-public class PasswordResourceTest extends AbstractAppTest {
+class PasswordResourceTest extends AbstractAppTest {
 
 	private Exception exOnPrepare = null;
 	private MimeMessage mockMessage;
@@ -63,13 +63,13 @@ public class PasswordResourceTest extends AbstractAppTest {
 	private PasswordResetRepository repository;
 
 	@BeforeEach
-	public void prepareConfiguration() throws IOException {
+	void prepareConfiguration() throws IOException {
 		persistEntities("csv", SystemConfiguration.class);
 		exOnPrepare = null;
 	}
 
 	@Test
-	public void generate() {
+	void generate() {
 		for (int i = 100; i-- > 0;) {
 			final String password = resource.generate();
 			Assertions.assertNotNull(password);
@@ -82,7 +82,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void isAcceptedClasses() {
+	void isAcceptedClasses() {
 		Assertions.assertFalse(resource.isAcceptedClasses("abcdefghIJ"));
 		Assertions.assertFalse(resource.isAcceptedClasses("0123456789"));
 		Assertions.assertFalse(resource.isAcceptedClasses("0124567Ab"));
@@ -92,21 +92,21 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void generateForUnknownUser() {
+	void generateForUnknownUser() {
 		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
 			newResource().generate(DEFAULT_USER, false);
 		}).getMessage());
 	}
 
 	@Test
-	public void generateForUser() {
+	void generateForUser() {
 		final PasswordResource resource = newResource();
 		mockUser(resource, "fdaugan");
 		Assertions.assertTrue(resource.isAcceptedClasses(resource.generate("fdaugan", false)));
 	}
 
 	@Test
-	public void generateForLockedUser() {
+	void generateForLockedUser() {
 		final PasswordResource resource = newResource();
 		Mockito.when(mockUser(resource, "fdaugan").getLocked()).thenReturn(new Date());
 		Assertions.assertEquals("unknown-id", Assertions
@@ -114,7 +114,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void generateForUserQuite() {
+	void generateForUserQuite() {
 		final PasswordResource resource = newResource();
 		mockUser(resource, "fdaugan");
 		UserOrg userOrg = resource.getUser().findById("fdaugan");
@@ -162,7 +162,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void sendMailPasswordNoPassword() throws MessagingException {
+	void sendMailPasswordNoPassword() throws MessagingException {
 		final PasswordResource resource = newResource();
 		final MimeMessage message = Mockito.mock(MimeMessage.class);
 		Mockito.when(resource.configuration.get("password.mail.url")).thenReturn("host");
@@ -194,20 +194,20 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void requestRecoveryUserNotFound() {
+	void requestRecoveryUserNotFound() {
 		final PasswordResource resource = newResource();
 		resource.requestRecovery("fdauganB", "f.d@sample.com");
 		Assertions.assertEquals(0, repository.findAll().size());
 	}
 
 	@Test
-	public void requestRecoveryBadMail() {
+	void requestRecoveryBadMail() {
 		resource.requestRecovery("fdaugan", "f.d@sample.com");
 		Assertions.assertEquals(0, repository.findAll().size());
 	}
 
 	@Test
-	public void requestRecoveryLocked() {
+	void requestRecoveryLocked() {
 		final PasswordResource resource = newResource();
 		final UserOrg lockedUser = mockUser(resource, "fdaugan");
 		Mockito.when(lockedUser.getLocked()).thenReturn(new Date());
@@ -218,7 +218,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void sendMailReset() throws MessagingException {
+	void sendMailReset() throws MessagingException {
 		final PasswordResource resource = newResource();
 		final UserOrg user = new UserOrg();
 		user.setFirstName("John");
@@ -243,7 +243,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void sendMailPassword() {
+	void sendMailPassword() {
 		final PasswordResource resource = newResource();
 
 		exOnPrepare = null;
@@ -260,7 +260,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void sendMailPasswordWithException() {
+	void sendMailPasswordWithException() {
 		final PasswordResource resource = newResource();
 		Mockito.when(resource.configuration.get("password.mail.url")).thenReturn("host");
 		final MailServicePlugin mailServicePlugin = resource.servicePluginLocator.getResource("service:mail:smtp:local",
@@ -278,7 +278,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void requestRecovery() throws MessagingException {
+	void requestRecovery() throws MessagingException {
 		final PasswordResource resource = newResource();
 		final MimeMessage message = Mockito.mock(MimeMessage.class);
 		resource.repository = repository;
@@ -331,7 +331,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void requestRecoveryRenewTooRecent() {
+	void requestRecoveryRenewTooRecent() {
 		// Too recent previous request
 		final Calendar calendar = DateUtils.newCalendar();
 		calendar.add(Calendar.MINUTE, -2);
@@ -345,7 +345,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void requestRecoveryRenewValid() {
+	void requestRecoveryRenewValid() {
 		// Very old initial reset
 		final Calendar calendar = DateUtils.newCalendar();
 		calendar.add(Calendar.DATE, -2);
@@ -359,7 +359,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void reset() {
+	void reset() {
 		resource.reset(prepareReset("fdaugan"), "fdaugan");
 
 		// check mocks
@@ -368,14 +368,14 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void resetInvalidUser() {
+	void resetInvalidUser() {
 		final PasswordResource resource = newResource();
 		resource.repository = repository;
 		resource.reset(prepareReset("fdaugan"), "fdaugan");
 	}
 
 	@Test
-	public void resetLockedUser() {
+	void resetLockedUser() {
 		final PasswordResource resource = newResource();
 		Mockito.when(resource.repository.findByLoginAndTokenAndDateAfter(ArgumentMatchers.anyString(),
 				ArgumentMatchers.anyString(), ArgumentMatchers.any(Date.class))).thenReturn(new PasswordReset());
@@ -397,7 +397,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void restInvalidToken() {
+	void restInvalidToken() {
 		// call business
 		final ResetPasswordByMailChallenge userResetPassword = new ResetPasswordByMailChallenge();
 		userResetPassword.setToken("bad-token");
@@ -425,7 +425,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void confirmRecoveryOldToken() {
+	void confirmRecoveryOldToken() {
 		// create dataset
 		final PasswordReset pwdReset = createRequest();
 		repository.save(pwdReset);
@@ -441,7 +441,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void updateAuthenticationFailed() {
+	void updateAuthenticationFailed() {
 		final PasswordResource resource = newResource();
 		final ResetPassword request = new ResetPassword();
 		request.setNewPassword("Strong3r");
@@ -452,7 +452,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void update() {
+	void update() {
 		initSpringSecurityContext("fdauganA");
 		final ResetPassword request = new ResetPassword();
 		request.setPassword("Azerty01");
@@ -467,7 +467,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void cleanRecoveriesAllRequests() {
+	void cleanRecoveriesAllRequests() {
 		initSpringSecurityContext("fdauganA");
 		// create dataset
 		final PasswordReset pwdResetOld = createRequest();
@@ -482,7 +482,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void cleanRecoveriesOneRequest() {
+	void cleanRecoveriesOneRequest() {
 		// create dataset
 		final PasswordReset pwdResetOld = createRequest();
 		repository.save(pwdResetOld);
@@ -500,7 +500,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void cleanRecoveriesNoRequests() {
+	void cleanRecoveriesNoRequests() {
 		// create dataset
 		final PasswordReset pwdReset1 = createRequest();
 		pwdReset1.setDate(new Date());
@@ -535,7 +535,7 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void checkPassword() {
+	void checkPassword() {
 		final Pattern pattern = Pattern.compile(ResetPassword.COMPLEXITY_PATTERN);
 
 		// Accepted password
@@ -556,12 +556,12 @@ public class PasswordResourceTest extends AbstractAppTest {
 	}
 
 	@Test
-	public void getKey() {
+	void getKey() {
 		Assertions.assertEquals("feature:password", resource.getKey());
 	}
 
 	@Test
-	public void getInstalledEntities() {
+	void getInstalledEntities() {
 		Assertions.assertTrue(resource.getInstalledEntities().contains(SystemConfiguration.class));
 	}
 }
