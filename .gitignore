@@ -1,7 +1,11 @@
 **/.DS_Store
 **/.settings
+**/.idea
 **/.project
 **/target
 **/.classpath
 **/dependency-reduced-pom.xml
 /*.exec
+**/node_modules
+**/*.iml
+/package-lock.json
