@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/ligoj/plugin-password.svg?branch=master)](https://travis-ci.org/ligoj/plugin-password)
 [![Build Status](https://circleci.com/gh/ligoj/plugin-password.svg?style=svg)](https://circleci.com/gh/ligoj/plugin-password)
-[![Build Status](https://semaphoreci.com/api/v1/ligoj/plugin-password/branches/master/shields_badge.svg)](https://semaphoreci.com/ligoj/plugin-password)
 [![Build Status](https://ci.appveyor.com/api/projects/status/lpm3p8mu0fp7oma8/branch/master?svg=true)](https://ci.appveyor.com/project/ligoj/plugin-password/branch/master)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.ligoj.plugin%3Aplugin-password&metric=coverage)](https://sonarcloud.io/dashboard?id=org.ligoj.plugin%3Aplugin-password)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?metric=alert_status&project=org.ligoj.plugin:plugin-password)](https://sonarcloud.io/dashboard/index/org.ligoj.plugin:plugin-password)
