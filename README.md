@@ -1,6 +1,6 @@
 # :link: Ligoj Password Management plugin [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-password/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-password)
 
-[![Build Status](https://travis-ci.org/ligoj/plugin-password.svg?branch=master)](https://travis-ci.org/ligoj/plugin-password)
+[![Build Status](https://travis-ci.com/ligoj/plugin-password.svg?branch=master)](https://travis-ci.com/ligoj/plugin-password)
 [![Build Status](https://circleci.com/gh/ligoj/plugin-password.svg?style=svg)](https://circleci.com/gh/ligoj/plugin-password)
 [![Build Status](https://ci.appveyor.com/api/projects/status/lpm3p8mu0fp7oma8/branch/master?svg=true)](https://ci.appveyor.com/project/ligoj/plugin-password/branch/master)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.ligoj.plugin%3Aplugin-password&metric=coverage)](https://sonarcloud.io/dashboard?id=org.ligoj.plugin%3Aplugin-password)
