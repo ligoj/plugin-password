@@ -1,8 +1,5 @@
 # :link: Ligoj Password Management plugin [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-password/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-password)
 
-[![Build Status](https://app.travis-ci.com/github/ligoj/plugin-password.svg?branch=master)](https://app.travis-ci.com/github/ligoj/plugin-password)
-[![Build Status](https://circleci.com/gh/ligoj/plugin-password.svg?style=svg)](https://circleci.com/gh/ligoj/plugin-password)
-[![Build Status](https://ci.appveyor.com/api/projects/status/lpm3p8mu0fp7oma8/branch/master?svg=true)](https://ci.appveyor.com/project/ligoj/plugin-password/branch/master)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.ligoj.plugin%3Aplugin-password&metric=coverage)](https://sonarcloud.io/dashboard?id=org.ligoj.plugin%3Aplugin-password)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?metric=alert_status&project=org.ligoj.plugin:plugin-password)](https://sonarcloud.io/dashboard/index/org.ligoj.plugin:plugin-password)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4531336334664f9286cb43df834172dd)](https://www.codacy.com/gh/ligoj/plugin-password?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/plugin-password&amp;utm_campaign=Badge_Grade)
