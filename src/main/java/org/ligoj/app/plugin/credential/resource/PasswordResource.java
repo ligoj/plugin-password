@@ -92,7 +92,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	/**
 	 * The default password validation regular expression.
 	 */
-	public static final String PASSWORD_VALIDATOR_DEFAULT = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{10,}$";
+	public static final String PASSWORD_VALIDATOR_DEFAULT = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{10,}$";
 
 	/**
 	 * Az09 string generator.
