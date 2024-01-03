@@ -173,7 +173,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 		final String login = securityHelper.getLogin();
 		final UserOrg user = getUser().findById(login);
 		// Check user and password
-		if (!getUser().authenticate(login, request.getPassword())) {
+		if (getUser().authenticate(login, request.getPassword()) == null) {
 			throw new ValidationJsonException("password", "login");
 		}
 
