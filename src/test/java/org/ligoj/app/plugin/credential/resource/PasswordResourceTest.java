@@ -3,18 +3,9 @@
  */
 package org.ligoj.app.plugin.credential.resource;
 
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.regex.Pattern;
-
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +34,10 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Test of {@link PasswordResource}
@@ -455,14 +450,14 @@ class PasswordResourceTest extends AbstractAppTest {
 	void update() {
 		initSpringSecurityContext("fdauganA");
 		final ResetPassword request = new ResetPassword();
-		request.setPassword("Azerty01");
-		request.setNewPassword("Azerty02");
+		request.setPassword("Secret01");
+		request.setNewPassword("Secret02");
 		resource.update(request);
-		getUser().authenticate("fdauganA", "Azerty02");
+		getUser().authenticate("fdauganA", "Secret02");
 
 		// Restore old value
-		request.setPassword("Azerty02");
-		request.setNewPassword("Azerty01");
+		request.setPassword("Secret02");
+		request.setNewPassword("Secret01");
 		resource.update(request);
 	}
 
@@ -541,18 +536,17 @@ class PasswordResourceTest extends AbstractAppTest {
 		// Accepted password
 		Assertions.assertTrue(pattern.matcher("aZ1-----").matches());
 		Assertions.assertTrue(pattern.matcher("aZ3rty?;").matches());
-		Assertions.assertTrue(pattern.matcher("azertyY2").matches());
-		Assertions.assertTrue(pattern.matcher("AZERTYa0").matches());
+		Assertions.assertTrue(pattern.matcher("secretY2").matches());
+		Assertions.assertTrue(pattern.matcher("SECRETa0").matches());
 		Assertions.assertTrue(pattern.matcher("b1234567890&#'{}()[].,;:!|<>-=+*_@$?§/£Y").matches());
 		Assertions.assertTrue(pattern.matcher("b0&#$%_-/:µ,.~¤!§*£=+|{}[]?<>;'&B").matches());
 
 		// Rejected password
-		Assertions.assertFalse(pattern.matcher("AZERYa0").matches());
-		Assertions.assertFalse(pattern.matcher("AZERYUIO").matches());
-		Assertions.assertFalse(pattern.matcher("azertyop").matches());
-		Assertions.assertFalse(pattern.matcher("azerty0p").matches());
-		Assertions.assertFalse(pattern.matcher("AZERYUI0").matches());
-		Assertions.assertFalse(pattern.matcher("AZéRYUI0").matches());
+		Assertions.assertFalse(pattern.matcher("CAPITALIZED").matches());
+		Assertions.assertFalse(pattern.matcher("lowercase").matches());
+		Assertions.assertFalse(pattern.matcher("secret0p").matches());
+		Assertions.assertFalse(pattern.matcher("SECRET0P").matches());
+		Assertions.assertFalse(pattern.matcher("SéCRETUI0").matches());
 	}
 
 	@Test
