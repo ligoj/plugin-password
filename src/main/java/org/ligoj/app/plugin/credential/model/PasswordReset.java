@@ -27,7 +27,7 @@ import lombok.Setter;
 public class PasswordReset extends AbstractPersistable<Integer> {
 
 	/**
-	 * User name/login/UID.
+	 * Username/login/UID.
 	 */
 	@NotNull
 	@NotBlank

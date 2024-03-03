@@ -130,7 +130,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 * @return A generated password.
 	 */
 	public String generate() {
-		String value = null;
+		String value;
 		do {
 			value = GENERATOR.generate(configuration.get(PASSWORD_GEN_LENGTH, PASSWORD_GEN_LENGTH_DEFAULT));
 		} while (!isAcceptedClasses(value));
@@ -138,12 +138,12 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	}
 
 	/**
-	 * Generate a password for given user. This password is is stored as digested in corresponding user entry.
+	 * Generate a password for given user. This password is stored as digested in corresponding user entry.
 	 *
 	 * @param uid
 	 *            UID of user.
 	 * @param quiet
-	 *            Flag to turn-off the possible notification such as mail. Never <code>null</code>.
+	 *            Flag to turn off the possible notification such as mail. Never <code>null</code>.
 	 */
 	@Override
 	public String generate(final String uid, final boolean quiet) {
@@ -182,7 +182,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	}
 
 	/**
-	 * Reset password from a mail challenge :token + mail + user name.
+	 * Reset password from a mail challenge :token + mail + username.
 	 *
 	 * @param request
 	 *            the user request.
@@ -213,7 +213,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	}
 
 	/**
-	 * Manage user password recovery with valid user name and mail.
+	 * Manage user password recovery with valid username and mail.
 	 *
 	 * @param uid
 	 *            user identifier.
@@ -315,8 +315,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 
 	private String format(final String key, final Map<String, String> values) {
 		final AtomicReference<String> cursor = new AtomicReference<>(configuration.get(key));
-		values.entrySet().forEach(
-				e -> cursor.getAndUpdate(s -> s.replace("$" + e.getKey(), StringUtils.trimToEmpty(e.getValue()))));
+		values.forEach((key1, value) -> cursor.getAndUpdate(s -> s.replace("$" + key1, StringUtils.trimToEmpty(value))));
 		return cursor.get();
 	}
 
@@ -382,7 +381,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 * @param password
 	 *            The password to set.
 	 * @param quiet
-	 *            Flag to turn-off the possible notification such as mail.
+	 *            Flag to turn off the possible notification such as mail.
 	 * @return the clear generated password.
 	 */
 	private String create(final String uid, final String password, final boolean quiet) {

@@ -88,9 +88,7 @@ class PasswordResourceTest extends AbstractAppTest {
 
 	@Test
 	void generateForUnknownUser() {
-		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
-			newResource().generate(DEFAULT_USER, false);
-		}).getMessage());
+		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> newResource().generate(DEFAULT_USER, false)).getMessage());
 	}
 
 	@Test
@@ -151,7 +149,7 @@ class PasswordResourceTest extends AbstractAppTest {
 		Mockito.when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
 				ArgumentMatchers.any(MimeMessagePreparator.class))).thenAnswer(a -> {
 					((MimeMessagePreparator) a.getArguments()[1]).prepare(mockMessage);
-					return (MimeMessagePreparator) a.getArguments()[1];
+					return a.getArguments()[1];
 				});
 		return resource;
 	}
@@ -294,14 +292,14 @@ class PasswordResourceTest extends AbstractAppTest {
 							return mimeMessagePreparator;
 						});
 
-		// Test with case insensitive mail
+		// Test with case-insensitive mail
 		resource.requestRecovery("fdaugan", "fDaugaN@sample.com");
 		em.flush();
 
 		Assertions.assertNull(exOnPrepare);
 		final List<PasswordReset> requests = repository.findAll();
 		Assertions.assertEquals(1, requests.size());
-		final PasswordReset passwordReset = requests.get(0);
+		final PasswordReset passwordReset = requests.getFirst();
 		Assertions.assertEquals("fdaugan", passwordReset.getLogin());
 
 		Mockito.verify(message, Mockito.atLeastOnce())
@@ -311,7 +309,6 @@ class PasswordResourceTest extends AbstractAppTest {
 
 	private void requestRecovery(final Date resetDate) {
 		final PasswordResource resource = newResource();
-		resource.repository = repository;
 		resource.iamProvider = new IamProvider[] { iamProvider };
 		resource.repository = repository;
 
@@ -333,7 +330,7 @@ class PasswordResourceTest extends AbstractAppTest {
 		requestRecovery(calendar.getTime());
 
 		Assertions.assertNull(exOnPrepare);
-		final PasswordReset passwordReset = repository.findAll().get(0);
+		final PasswordReset passwordReset = repository.findAll().getFirst();
 
 		// Check the reset date has not been updated
 		Assertions.assertEquals(calendar.getTime(), passwordReset.getDate());
@@ -346,7 +343,7 @@ class PasswordResourceTest extends AbstractAppTest {
 		calendar.add(Calendar.DATE, -2);
 		requestRecovery(new Date(0));
 		Assertions.assertNull(exOnPrepare);
-		final PasswordReset passwordReset = repository.findAll().get(0);
+		final PasswordReset passwordReset = repository.findAll().getFirst();
 
 		// Check the reset date has been updated
 		Assertions.assertNotEquals(calendar.getTime(), passwordReset.getDate());
@@ -397,9 +394,7 @@ class PasswordResourceTest extends AbstractAppTest {
 		final ResetPasswordByMailChallenge userResetPassword = new ResetPasswordByMailChallenge();
 		userResetPassword.setToken("bad-token");
 		userResetPassword.setPassword("Strong3r");
-		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
-			resource.reset(userResetPassword, "mdupont");
-		}).getMessage());
+		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> resource.reset(userResetPassword, "mdupont")).getMessage());
 		em.flush();
 	}
 
@@ -430,9 +425,7 @@ class PasswordResourceTest extends AbstractAppTest {
 		final ResetPasswordByMailChallenge userResetPassword = new ResetPasswordByMailChallenge();
 		userResetPassword.setToken("t-t-t-t");
 		userResetPassword.setPassword("Strong3r");
-		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> {
-			resource.reset(userResetPassword, "mdupont");
-		}).getMessage());
+		Assertions.assertEquals("unknown-id", Assertions.assertThrows(BusinessException.class, () -> resource.reset(userResetPassword, "mdupont")).getMessage());
 	}
 
 	@Test
@@ -441,9 +434,7 @@ class PasswordResourceTest extends AbstractAppTest {
 		final ResetPassword request = new ResetPassword();
 		request.setNewPassword("Strong3r");
 		request.setPassword("any");
-		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> {
-			resource.update(request);
-		}), "password", "login");
+		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> resource.update(request)), "password", "login");
 	}
 
 	@Test
@@ -525,7 +516,7 @@ class PasswordResourceTest extends AbstractAppTest {
 		final PasswordReset pwdReset = new PasswordReset();
 		pwdReset.setLogin("mdupont");
 		pwdReset.setToken("t-t-t-t");
-		pwdReset.setDate(new GregorianCalendar(2012, 2, 2).getTime());
+		pwdReset.setDate(new GregorianCalendar(2012, Calendar.MARCH, 2).getTime());
 		return pwdReset;
 	}
 
