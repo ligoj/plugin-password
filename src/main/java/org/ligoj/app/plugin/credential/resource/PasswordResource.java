@@ -226,7 +226,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 		// Check user exists and is not locked
 		final UserOrg user = getUser().findById(uid);
 		if (user != null && user.getLocked() == null) {
-			// Case insensitive match
+			// Case-insensitive match
 			final Set<String> mails = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 			mails.addAll(user.getMails());
 			final Calendar calendar = DateUtils.newCalendar();
