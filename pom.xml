@@ -1,57 +1,57 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.ligoj.api</groupId>
-		<artifactId>plugin-parent</artifactId>
-		<version>4.1.7</version>
-		<relativePath />
-	</parent>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.ligoj.api</groupId>
+        <artifactId>plugin-parent</artifactId>
+        <version>4.1.8</version>
+        <relativePath/>
+    </parent>
 
-	<groupId>org.ligoj.plugin</groupId>
-	<artifactId>plugin-password</artifactId>
-	<version>1.1.2-SNAPSHOT</version>
-	<packaging>jar</packaging>
-	<name>Ligoj - Plugin Password Management</name>
-	<description>Plugin to enable password reset and creation with challenge by mail</description>
+    <groupId>org.ligoj.plugin</groupId>
+    <artifactId>plugin-password</artifactId>
+    <version>1.1.2-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>Ligoj - Plugin Password Management</name>
+    <description>Plugin to enable password reset and creation with challenge by mail</description>
 
-	<properties>
-		<sonar.sources>src/main/java</sonar.sources>
-	</properties>
+    <properties>
+        <sonar.sources>src/main/java</sonar.sources>
+    </properties>
 
-	<scm>
-		<connection>scm:git:https://github.com/ligoj/plugin-password</connection>
-		<developerConnection>scm:git:https://github.com/ligoj/plugin-password</developerConnection>
-		<url>https://github.com/ligoj/plugin-password.git</url>
-	</scm>
+    <scm>
+        <connection>scm:git:https://github.com/ligoj/plugin-password</connection>
+        <developerConnection>scm:git:https://github.com/ligoj/plugin-password</developerConnection>
+        <url>https://github.com/ligoj/plugin-password.git</url>
+    </scm>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-mail</artifactId>
-			<version>[1.1.0-SNAPSHOT,1.2.0)</version>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.ligoj.plugin</groupId>
+            <artifactId>plugin-mail</artifactId>
+            <version>[1.1.0-SNAPSHOT,1.2.0)</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
 
-		<dependency>
-			<groupId>jakarta.mail</groupId>
-			<artifactId>jakarta.mail-api</artifactId>
-			<version>2.1.1</version>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>jakarta.mail</groupId>
+            <artifactId>jakarta.mail-api</artifactId>
+            <version>2.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
-	<profiles>
-		<profile>
-			<id>github</id>
-			<distributionManagement>
-				<repository>
-					<id>github-ligoj</id>
-					<name>GitHub Packages</name>
-					<url>https://maven.pkg.github.com/ligoj/plugin-password</url>
-				</repository>
-			</distributionManagement>
-		</profile>
-	</profiles>
+    <profiles>
+        <profile>
+            <id>github</id>
+            <distributionManagement>
+                <repository>
+                    <id>github-ligoj</id>
+                    <name>GitHub Packages</name>
+                    <url>https://maven.pkg.github.com/ligoj/plugin-password</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 </project>
