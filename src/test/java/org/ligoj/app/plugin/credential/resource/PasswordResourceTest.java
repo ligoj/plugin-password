@@ -36,6 +36,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -101,7 +102,7 @@ class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	void generateForLockedUser() {
 		final PasswordResource resource = newResource();
-		Mockito.when(mockUser(resource, "fdaugan").getLocked()).thenReturn(new Date());
+		Mockito.when(mockUser(resource, "fdaugan").getLocked()).thenReturn(Instant.now());
 		Assertions.assertEquals("unknown-id", Assertions
 				.assertThrows(BusinessException.class, () -> resource.generate("fdaugan", false)).getMessage());
 	}
@@ -203,7 +204,7 @@ class PasswordResourceTest extends AbstractAppTest {
 	void requestRecoveryLocked() {
 		final PasswordResource resource = newResource();
 		final UserOrg lockedUser = mockUser(resource, "fdaugan");
-		Mockito.when(lockedUser.getLocked()).thenReturn(new Date());
+		Mockito.when(lockedUser.getLocked()).thenReturn(Instant.now());
 		resource.requestRecovery("fdaugan", "f.d@sample.com");
 		Assertions.assertEquals(0, repository.findAll().size());
 		Mockito.verify(lockedUser).getLocked();
@@ -372,7 +373,7 @@ class PasswordResourceTest extends AbstractAppTest {
 		Mockito.when(resource.repository.findByLoginAndTokenAndDateAfter(ArgumentMatchers.anyString(),
 				ArgumentMatchers.anyString(), ArgumentMatchers.any(Date.class))).thenReturn(new PasswordReset());
 		final UserOrg lockedUser = mockUser(resource, "fdaugan");
-		Mockito.when(lockedUser.getLocked()).thenReturn(new Date());
+		Mockito.when(lockedUser.getLocked()).thenReturn(Instant.now());
 		resource.reset(prepareReset("fdaugan"), "fdaugan");
 		Assertions.assertEquals(1, repository.findAll().size());
 		Mockito.verify(lockedUser).getLocked();

@@ -3,41 +3,20 @@
  */
 package org.ligoj.app.plugin.credential.resource;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
-
 import jakarta.mail.Message;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.commons.text.RandomStringGenerator;
-import org.ligoj.app.iam.IPasswordGenerator;
-import org.ligoj.app.iam.IUserRepository;
-import org.ligoj.app.iam.IamProvider;
-import org.ligoj.app.iam.SimpleUserOrg;
-import org.ligoj.app.iam.UserOrg;
+import org.ligoj.app.iam.*;
 import org.ligoj.app.plugin.credential.dao.PasswordResetRepository;
 import org.ligoj.app.plugin.credential.model.PasswordReset;
 import org.ligoj.app.resource.ServicePluginLocator;
@@ -53,7 +32,10 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Password resource.
@@ -98,7 +80,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 	 * Az09 string generator.
 	 */
 	private static final RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder()
-			.filteredBy(c -> CharUtils.isAsciiAlphanumeric(Character.toChars(c)[0])).build();
+			.filteredBy(c -> CharUtils.isAsciiAlphanumeric(Character.toChars(c)[0])).get();
 
 	/**
 	 * IAM provider.
@@ -309,7 +291,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 		values.put("LASTNAME", user.getLastName());
 		values.put("COMPANY", user.getCompany());
 		values.put("FULLNAME", user.getFirstName() + " " + user.getLastName());
-		values.put("LINK", StringUtils.removeEnd(configuration.get(URL_PUBLIC), "/"));
+		values.put("LINK", Strings.CS.removeEnd(configuration.get(URL_PUBLIC), "/"));
 		return values;
 	}
 
