@@ -1,4 +1,4 @@
-# :link: Ligoj Password Management plugin [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-password/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-password)
+# :link: Ligoj Password Management plugin ![Maven Central](https://img.shields.io/maven-central/v/org.ligoj.plugin/plugin-password)
 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.ligoj.plugin%3Aplugin-password&metric=coverage)](https://sonarcloud.io/dashboard?id=org.ligoj.plugin%3Aplugin-password)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?metric=alert_status&project=org.ligoj.plugin:plugin-password)](https://sonarcloud.io/dashboard/index/org.ligoj.plugin:plugin-password)
