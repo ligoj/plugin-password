@@ -1,0 +1,57 @@
+{
+  "name": "ligoj-plugin-password",
+  "version": "0.1.0",
+  "description": "Password management — change password view + service wiring around /rest/service/password endpoints. Recovery / reset for unauthenticated users live in the host's LoginApp.vue (pre-session, no plugin loader).",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": "kloudy.io",
+  "contributors": [
+    "Fabrice Daugan <fabrice.daugan@gmail.com>"
+  ],
+  "homepage": "https://github.com/ligoj/plugin-password#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ligoj/plugin-password.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ligoj/plugin-password/issues"
+  },
+  "keywords": [
+    "ligoj",
+    "plugin",
+    "password",
+    "credential",
+    "vue",
+    "vite"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.34"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitejs/plugin-vue": "6.0.6",
+    "@vue/test-utils": "^2.4.10",
+    "eslint": "^10.3.0",
+    "eslint-plugin-vue": "^10.9.1",
+    "globals": "^17.0.0",
+    "jsdom": "^28.1.0",
+    "pinia": "^3.0.4",
+    "vite": "^8.0.10",
+    "vitest": "^4.1.7",
+    "vue": "^3.5.34",
+    "vue-router": "^5.0.6"
+  }
+}
