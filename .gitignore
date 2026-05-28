@@ -6,7 +6,4 @@
 **/.classpath
 **/dependency-reduced-pom.xml
 /*.exec
-**/node_modules
-**/*.iml
-/package-lock.json
 src/main/resources/META-INF/resources/webjars/password/vue/*
