@@ -28,7 +28,6 @@ import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.bootstrap.model.system.SystemConfiguration;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.test.annotation.Rollback;
@@ -39,6 +38,8 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 import java.util.regex.Pattern;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Test of {@link PasswordResource}
@@ -102,7 +103,7 @@ class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	void generateForLockedUser() {
 		final PasswordResource resource = newResource();
-		Mockito.when(mockUser(resource, "fdaugan").getLocked()).thenReturn(Instant.now());
+		when(mockUser(resource, "fdaugan").getLocked()).thenReturn(Instant.now());
 		Assertions.assertEquals("unknown-id", Assertions
 				.assertThrows(BusinessException.class, () -> resource.generate("fdaugan", false)).getMessage());
 	}
@@ -112,42 +113,42 @@ class PasswordResourceTest extends AbstractAppTest {
 		final PasswordResource resource = newResource();
 		mockUser(resource, "fdaugan");
 		UserOrg userOrg = resource.getUser().findById("fdaugan");
-		Mockito.verify(userOrg, Mockito.never()).getMails();
+		verify(userOrg, never()).getMails();
 		Assertions.assertTrue(resource.isAcceptedClasses(resource.generate("fdaugan", true)));
 	}
 
 	private PasswordResource newResource() {
 		final PasswordResource resource = new PasswordResource();
-		resource.iamProvider = new IamProvider[] { Mockito.mock(IamProvider.class) };
-		final IamConfiguration iamConfiguration = Mockito.mock(IamConfiguration.class);
-		final IUserRepository mock = Mockito.mock(IUserRepository.class);
-		Mockito.when(iamConfiguration.getUserRepository()).thenReturn(mock);
-		Mockito.when(resource.iamProvider[0].getConfiguration()).thenReturn(iamConfiguration);
-		final ConfigurationResource configuration = Mockito.mock(ConfigurationResource.class);
-		Mockito.when(configuration.get("password.mail.from")).thenReturn("FROM");
-		Mockito.when(configuration.get("password.mail.new.subject")).thenReturn("NEW-$FULLNAME");
-		Mockito.when(configuration.get("password.mail.new.content"))
+		resource.iamProvider = new IamProvider[] { mock(IamProvider.class) };
+		final IamConfiguration iamConfiguration = mock(IamConfiguration.class);
+		final IUserRepository mock = mock(IUserRepository.class);
+		when(iamConfiguration.getUserRepository()).thenReturn(mock);
+		when(resource.iamProvider[0].getConfiguration()).thenReturn(iamConfiguration);
+		final ConfigurationResource configuration = mock(ConfigurationResource.class);
+		when(configuration.get("password.mail.from")).thenReturn("FROM");
+		when(configuration.get("password.mail.new.subject")).thenReturn("NEW-$FULLNAME");
+		when(configuration.get("password.mail.new.content"))
 				.thenReturn("new-$FULLNAME,$FIRSTNAME,$LASTNAME,$LINK,$ID,$COMPANY");
-		Mockito.when(configuration.get("password.mail.reset.content"))
+		when(configuration.get("password.mail.reset.content"))
 				.thenReturn("reset-$FULLNAME,$FIRSTNAME,$LASTNAME,$LINK,$ID,$COMPANY");
-		Mockito.when(configuration.get("password.mail.reset.subject")).thenReturn("RESET-$FULLNAME");
-		Mockito.when(configuration.get("password.mail.node")).thenReturn("service:mail:smtp:local");
-		Mockito.when(configuration.get("password.mail.url")).thenReturn("host");
-		Mockito.when(configuration.get(PasswordResource.PASSWORD_GEN_LENGTH, 10)).thenReturn(10);
-		Mockito.when(
+		when(configuration.get("password.mail.reset.subject")).thenReturn("RESET-$FULLNAME");
+		when(configuration.get("password.mail.node")).thenReturn("service:mail:smtp:local");
+		when(configuration.get("password.mail.url")).thenReturn("host");
+		when(configuration.get(PasswordResource.PASSWORD_GEN_LENGTH, 10)).thenReturn(10);
+		when(
 				configuration.get(PasswordResource.PASSWORD_VALIDATOR, PasswordResource.PASSWORD_VALIDATOR_DEFAULT))
 				.thenReturn(PasswordResource.PASSWORD_VALIDATOR_DEFAULT);
 		resource.configuration = configuration;
-		resource.repository = Mockito.mock(PasswordResetRepository.class);
-		resource.servicePluginLocator = Mockito.mock(ServicePluginLocator.class);
-		resource.securityHelper = Mockito.mock(SecurityHelper.class);
-		Mockito.when(resource.securityHelper.getLogin()).thenReturn(getAuthenticationName());
+		resource.repository = mock(PasswordResetRepository.class);
+		resource.servicePluginLocator = mock(ServicePluginLocator.class);
+		resource.securityHelper = mock(SecurityHelper.class);
+		when(resource.securityHelper.getLogin()).thenReturn(getAuthenticationName());
 
-		mockMessage = Mockito.mock(MimeMessage.class);
-		MailServicePlugin mailServicePlugin = Mockito.mock(MailServicePlugin.class);
-		Mockito.when(resource.servicePluginLocator.getResource("service:mail:smtp:local", MailServicePlugin.class))
+		mockMessage = mock(MimeMessage.class);
+		MailServicePlugin mailServicePlugin = mock(MailServicePlugin.class);
+		when(resource.servicePluginLocator.getResource("service:mail:smtp:local", MailServicePlugin.class))
 				.thenReturn(mailServicePlugin);
-		Mockito.when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
+		when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
 				ArgumentMatchers.any(MimeMessagePreparator.class))).thenAnswer(a -> {
 					((MimeMessagePreparator) a.getArguments()[1]).prepare(mockMessage);
 					return a.getArguments()[1];
@@ -158,11 +159,11 @@ class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	void sendMailPasswordNoPassword() throws MessagingException {
 		final PasswordResource resource = newResource();
-		final MimeMessage message = Mockito.mock(MimeMessage.class);
-		Mockito.when(resource.configuration.get("password.mail.url")).thenReturn("host");
+		final MimeMessage message = mock(MimeMessage.class);
+		when(resource.configuration.get("password.mail.url")).thenReturn("host");
 		final MailServicePlugin mailServicePlugin = resource.servicePluginLocator.getResource("service:mail:smtp:local",
 				MailServicePlugin.class);
-		Mockito.when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
+		when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
 				ArgumentMatchers.any(MimeMessagePreparator.class))).thenAnswer(
 
 						i -> {
@@ -182,7 +183,7 @@ class PasswordResourceTest extends AbstractAppTest {
 		user.setMails(Collections.singletonList("f.g@sample.com"));
 		resource.sendMailPassword(user, null);
 		Assertions.assertNull(exOnPrepare);
-		Mockito.verify(message, Mockito.atLeastOnce()).setContent(
+		verify(message, atLeastOnce()).setContent(
 				"new-John Doe,John,Doe,host,fdauganB,",
 				"text/html; charset=UTF-8");
 	}
@@ -204,11 +205,11 @@ class PasswordResourceTest extends AbstractAppTest {
 	void requestRecoveryLocked() {
 		final PasswordResource resource = newResource();
 		final UserOrg lockedUser = mockUser(resource, "fdaugan");
-		Mockito.when(lockedUser.getLocked()).thenReturn(Instant.now());
+		when(lockedUser.getLocked()).thenReturn(Instant.now());
 		resource.requestRecovery("fdaugan", "f.d@sample.com");
 		Assertions.assertEquals(0, repository.findAll().size());
-		Mockito.verify(lockedUser).getLocked();
-		Mockito.verifyNoMoreInteractions(lockedUser);
+		verify(lockedUser).getLocked();
+		verifyNoMoreInteractions(lockedUser);
 	}
 
 	@Test
@@ -220,7 +221,7 @@ class PasswordResourceTest extends AbstractAppTest {
 		user.setId("fdauganB");
 		user.setMails(Collections.singletonList("f.g@sample.com"));
 		resource.sendMailReset(user, "mail", "token");
-		Mockito.verify(mockMessage, Mockito.atLeastOnce()).setContent(
+		verify(mockMessage, atLeastOnce()).setContent(
 				"reset-John Doe,John,Doe,host#reset=token/fdauganB,fdauganB,",
 				"text/html; charset=UTF-8");
 	}
@@ -228,11 +229,11 @@ class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	void sendMailNoMailPlugin() {
 		final PasswordResource resource = new PasswordResource();
-		resource.servicePluginLocator = Mockito.mock(ServicePluginLocator.class);
-		resource.configuration = Mockito.mock(ConfigurationResource.class);
-		Mockito.doReturn("service:mail:deleted-plug-in").when(resource.configuration).get("password.mail.node");
+		resource.servicePluginLocator = mock(ServicePluginLocator.class);
+		resource.configuration = mock(ConfigurationResource.class);
+		doReturn("service:mail:deleted-plug-in").when(resource.configuration).get("password.mail.node");
 		resource.sendMail(null);
-		Mockito.verify(resource.servicePluginLocator).getResource("service:mail:deleted-plug-in",
+		verify(resource.servicePluginLocator).getResource("service:mail:deleted-plug-in",
 				MailServicePlugin.class);
 	}
 
@@ -249,17 +250,17 @@ class PasswordResourceTest extends AbstractAppTest {
 		resource.sendMailPassword(user, "password");
 		MailServicePlugin mailService = resource.servicePluginLocator.getResource("service:mail:smtp:local",
 				MailServicePlugin.class);
-		Mockito.verify(mailService, Mockito.atLeastOnce()).send(ArgumentMatchers.eq("service:mail:smtp:local"),
+		verify(mailService, atLeastOnce()).send(ArgumentMatchers.eq("service:mail:smtp:local"),
 				ArgumentMatchers.any(MimeMessagePreparator.class));
 	}
 
 	@Test
 	void sendMailPasswordWithException() {
 		final PasswordResource resource = newResource();
-		Mockito.when(resource.configuration.get("password.mail.url")).thenReturn("host");
+		when(resource.configuration.get("password.mail.url")).thenReturn("host");
 		final MailServicePlugin mailServicePlugin = resource.servicePluginLocator.getResource("service:mail:smtp:local",
 				MailServicePlugin.class);
-		Mockito.when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
+		when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
 				ArgumentMatchers.any(MimeMessagePreparator.class))).thenAnswer(i -> {
 					throw new BusinessException(null, MimeMessagePreparator.class);
 				});
@@ -274,13 +275,13 @@ class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	void requestRecovery() throws MessagingException {
 		final PasswordResource resource = newResource();
-		final MimeMessage message = Mockito.mock(MimeMessage.class);
+		final MimeMessage message = mock(MimeMessage.class);
 		resource.repository = repository;
 		resource.iamProvider = new IamProvider[] { iamProvider };
-		Mockito.when(resource.configuration.get("password.mail.url")).thenReturn("host");
+		when(resource.configuration.get("password.mail.url")).thenReturn("host");
 		final MailServicePlugin mailServicePlugin = resource.servicePluginLocator.getResource("service:mail:smtp:local",
 				MailServicePlugin.class);
-		Mockito.when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
+		when(mailServicePlugin.send(ArgumentMatchers.eq("service:mail:smtp:local"),
 				ArgumentMatchers.any(MimeMessagePreparator.class))).thenAnswer(
 
 						i -> {
@@ -303,7 +304,7 @@ class PasswordResourceTest extends AbstractAppTest {
 		final PasswordReset passwordReset = requests.getFirst();
 		Assertions.assertEquals("fdaugan", passwordReset.getLogin());
 
-		Mockito.verify(message, Mockito.atLeastOnce())
+		verify(message, atLeastOnce())
 				.setContent("reset-First Last,First,Last,host#reset=" + passwordReset.getToken() + "/fdaugan,fdaugan,",
 						"text/html; charset=UTF-8");
 	}
@@ -370,22 +371,22 @@ class PasswordResourceTest extends AbstractAppTest {
 	@Test
 	void resetLockedUser() {
 		final PasswordResource resource = newResource();
-		Mockito.when(resource.repository.findByLoginAndTokenAndDateAfter(ArgumentMatchers.anyString(),
+		when(resource.repository.findByLoginAndTokenAndDateAfter(ArgumentMatchers.anyString(),
 				ArgumentMatchers.anyString(), ArgumentMatchers.any(Date.class))).thenReturn(new PasswordReset());
 		final UserOrg lockedUser = mockUser(resource, "fdaugan");
-		Mockito.when(lockedUser.getLocked()).thenReturn(Instant.now());
+		when(lockedUser.getLocked()).thenReturn(Instant.now());
 		resource.reset(prepareReset("fdaugan"), "fdaugan");
 		Assertions.assertEquals(1, repository.findAll().size());
-		Mockito.verify(lockedUser).getLocked();
-		Mockito.verifyNoMoreInteractions(lockedUser);
+		verify(lockedUser).getLocked();
+		verifyNoMoreInteractions(lockedUser);
 	}
 
 	private UserOrg mockUser(final PasswordResource resource, final String login) {
 		final IUserRepository mock = resource.getUser();
-		final UserOrg user = Mockito.mock(UserOrg.class);
-		Mockito.when(mock.findById(login)).thenReturn(user);
-		Mockito.when(user.getId()).thenReturn(login);
-		Mockito.when(user.getMails()).thenReturn(Collections.emptyList());
+		final UserOrg user = mock(UserOrg.class);
+		when(mock.findById(login)).thenReturn(user);
+		when(user.getId()).thenReturn(login);
+		when(user.getMails()).thenReturn(Collections.emptyList());
 		return user;
 	}
 
