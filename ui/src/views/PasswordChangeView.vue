@@ -10,10 +10,10 @@
         <v-card>
           <v-card-text>
             <v-form ref="formRef" @submit.prevent="submit">
-              <v-text-field v-model="form.password" type="password" autocomplete="current-password" :label="t('password.change.current')" :rules="REQUIRED_RULES" variant="outlined" class="mb-2" />
-              <v-text-field v-model="form.newPassword" type="password" autocomplete="new-password" :label="t('password.change.new')" :rules="NEW_PASSWORD_RULES" :hint="t('password.change.helpPassword')"
+              <LigojTextField v-model="form.password" type="password" autocomplete="current-password" :label="t('password.change.current')" :rules="REQUIRED_RULES" variant="outlined" class="mb-2" />
+              <LigojTextField v-model="form.newPassword" type="password" autocomplete="new-password" :label="t('password.change.new')" :rules="NEW_PASSWORD_RULES" :hint="t('password.change.helpPassword')"
                 persistent-hint variant="outlined" class="mb-4" />
-              <v-text-field v-model="form.confirm" type="password" autocomplete="new-password" :label="t('password.change.confirm')" :rules="CONFIRM_RULES" variant="outlined" class="mb-2" />
+              <LigojTextField v-model="form.confirm" type="password" autocomplete="new-password" :label="t('password.change.confirm')" :rules="CONFIRM_RULES" variant="outlined" class="mb-2" />
             </v-form>
           </v-card-text>
           <v-card-actions>
@@ -32,7 +32,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAppStore, useErrorStore, useI18nStore } from '@ligoj/host'
+import { LigojTextField, useAppStore, useErrorStore, useI18nStore } from '@ligoj/host'
 import service from '../service.js'
 
 const router = useRouter()
