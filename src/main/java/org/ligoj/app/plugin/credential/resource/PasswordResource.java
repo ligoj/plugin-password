@@ -324,7 +324,7 @@ public class PasswordResource implements IPasswordGenerator, FeaturePlugin {
 			// "plugin-mail" plug-in is available, locate the node
 			final Object plugin = servicePluginLocator.getResource(node, mailService);
 			if (plugin == null) {
-				// Node is not available: fail safe mode, deleted plug-in, ...
+				// Node is not available: failsafe mode, deleted plug-in, ...
 				log.info("Unable to send the password mail using node {}: not available", node);
 			} else {
 				// Node is available, send the mail through it
